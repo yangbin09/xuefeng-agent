@@ -1,0 +1,30 @@
+# ---------- 密钥 / 本地配置 ----------
+.env
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+
+# ---------- 运行时生成 ----------
+# 首次运行由 admission_clean.db.gz 自动解压出来的 143MB 大表，不进仓库
+admission_clean.db
+*.db-wal
+*.db-shm
+gaokao_cache.db
+build_log.txt
+
+# 引擎数据库需要随仓库分发（开箱即用），这里做例外声明
+!data/engine.db
+
+# ---------- 本地备份 / 临时文件 ----------
+backup/
+*.bak
+*.原始备份
+xuefeng-promo-video/
+demo-thumb.gif
+demo-video.mp4
+
+# ---------- 系统文件 ----------
+.DS_Store
+Thumbs.db
+desktop.ini

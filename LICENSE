@@ -1,0 +1,44 @@
+GNU AFFERO GENERAL PUBLIC LICENSE
+Version 3, 19 November 2007
+
+Copyright (C) 2026 雪峰Agent Contributors (github.com/ziqihe10-droid/xuefeng-agent)
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along with this program. If not, see https://www.gnu.org/licenses/.
+
+---
+
+## AGPL v3 核心条款（中文摘要）
+
+| # | 条款 | 说明 |
+|---|------|------|
+| 1 | **保留署名** | 使用、修改、分发本软件，必须完整保留原始版权声明和仓库地址 (github.com/ziqihe10-droid/xuefeng-agent) |
+| 2 | **传染性开源** | 修改后必须以相同的 AGPL v3 协议开源**全部修改后的源码**，不得改用 MIT/Apache 等宽松协议 |
+| 3 | **网络服务也需开源** | 即使只通过网络提供服务（SaaS/网站/API），不发布二进制，也必须公开完整源码 |
+| 4 | **原作者商业特权** | **原作者（贺子麒 / ziqihe10-droid）保留单独商业授权和闭源商用的独占权利** |
+| 5 | **个人非商业免费** | 个人学习、研究、非商业使用完全免费 |
+
+### ❌ 以下行为属于违反 AGPLv3：
+
+- 删除或隐藏原作者署名、仓库原地址
+- 将本软件或衍生作品改用 MIT / Apache 2.0 等非 AGPL 协议发布
+- 宣称代码完全由自己原创
+- 闭源商用、或通过网络提供服务但拒绝公开源码
+- 只发布二进制/部署版本而不提供完整源码
+
+### ✅ 以下行为合规：
+
+- 个人学习、自己使用、不发布 — 随意
+- Fork 后保持 AGPLv3 + 保留署名 + 公开全部修改 → 合法衍生作品
+- 商业使用 → 联系作者获取单独商业授权
+
+---
+
+**原作者（Licensor）**：贺子麒 / ziqihe10-droid
+**项目地址**：https://github.com/ziqihe10-droid/xuefeng-agent
+**商业授权咨询**：https://github.com/ziqihe10-droid
+
+完整法律文本：https://www.gnu.org/licenses/agpl-3.0.html

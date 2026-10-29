@@ -1,0 +1,2111 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>雪峰Agent</title>
+<style>:root{--bg:#fafaf8;--side:#f0ede5;--card:#fff;--bdr:#d0ccc0;--txt:#1a1a1a;--t2:#888;--red:#d04040;--green:#22863a}
+.dark{--bg:#1a1a18;--side:#222220;--card:#2a2a26;--bdr:#444;--txt:#ddd;--red:#e05555}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font:14px/1.7 'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--txt);height:100vh;display:flex}
+.side{width:260px;background:var(--side);border-right:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0}
+.side h2{padding:20px 18px 8px;font-size:18px}.side .sub{font-size:11px;color:var(--t2);padding:0 18px 16px;border-bottom:1px solid var(--bdr)}
+.list{overflow-y:auto;padding:4px 12px;flex:1;min-height:60px}
+.item{padding:10px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--t2);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item:hover{background:var(--card)}.item.on{background:var(--red);color:#fff}
+.new-btn{margin:8px 12px 16px;padding:8px;text-align:center;border:1px dashed var(--bdr);border-radius:6px;cursor:pointer;font-size:12px;color:var(--t2)}
+.new-btn:hover{background:var(--card)}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.bar{height:60px;display:flex;align-items:center;padding:0 20px;border-bottom:2px solid var(--bdr);gap:12px;background:var(--side)}
+.bar .logo{font-weight:700;font-size:17px;margin-right:auto}
+.bar button{padding:6px 12px;border:1px solid var(--bdr);border-radius:6px;background:var(--card);cursor:pointer;font-size:12px;color:var(--txt)}
+.bar button.on{background:var(--red);color:#fff;border-color:var(--red)}.bar .api-btn{background:var(--red);color:#fff;border-color:var(--red)}
+.bar img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--bdr)}
+.msgs{flex:1;overflow-y:auto;padding:20px 40px}
+.welcome{text-align:center;margin-top:80px;color:var(--t2)}.welcome .icon{font-size:48px;margin-bottom:12px}
+.bubble{max-width:75%;padding:12px 16px;border-radius:10px;margin-bottom:10px;font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.bubble.u{background:var(--red);color:#fff;margin-left:auto}.bubble.a{background:var(--side);border:1px solid var(--bdr)}
+.bubble .who{font-size:10px;opacity:.6;margin-bottom:4px}
+.inp{padding:12px 20px 20px;display:flex;gap:8px}
+.inp textarea{flex:1;padding:12px;border:1px solid var(--bdr);border-radius:6px;font:inherit;resize:none;height:50px;background:var(--card);color:var(--txt);outline:none}
+.inp textarea:focus{border-color:var(--red)}.inp button{padding:0 20px;background:var(--red);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;display:none;align-items:center;justify-content:center}
+.overlay>div{background:var(--card);border-radius:12px;padding:28px;width:460px;border:1px solid var(--bdr)}
+.overlay h3{margin-bottom:16px}.overlay label{display:block;font-size:11px;color:var(--t2);margin:12px 0 4px}
+.overlay input{width:100%;padding:10px;border:1px solid var(--bdr);border-radius:6px;font:inherit;background:var(--bg);color:var(--txt)}
+.overlay .btns{display:flex;gap:8px;margin-top:20px}.overlay .btns button{padding:10px 20px;border:1px solid var(--bdr);border-radius:6px;cursor:pointer}.overlay .btns .ok{flex:1;background:var(--red);color:#fff}
+.st{font-size:12px;margin-top:10px}.st.g{color:var(--green)}.st.b{color:var(--red)}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--t2);animation:dot 1.4s infinite;margin:0 2px}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,80%,100%{transform:scale(.6)}40%{transform:scale(1)}}
+.fun-bg{position:relative}.fun-bg::before{content:'';position:absolute;left:0;top:0;bottom:0;width:58%;background:url(/img_scifi.png) left center/contain no-repeat;opacity:0.8;pointer-events:none;z-index:0}
+.bubble{position:relative;z-index:1}.welcome{position:relative;z-index:1}
+/* ===== Markdown 渲染样式（助手气泡） ===== */
+.bubble.md{white-space:normal}
+.bubble.md>p{margin:0 0 8px}.bubble.md>p:last-child{margin-bottom:0}
+.bubble.md h1,.bubble.md h2,.bubble.md h3,.bubble.md h4,.bubble.md h5,.bubble.md h6{margin:14px 0 6px;line-height:1.4;font-weight:700}
+.bubble.md h1:first-child,.bubble.md h2:first-child,.bubble.md h3:first-child,.bubble.md h4:first-child{margin-top:0}
+.bubble.md h1{font-size:17px}.bubble.md h2{font-size:16px}.bubble.md h3{font-size:15px}
+.bubble.md h4,.bubble.md h5,.bubble.md h6{font-size:14px}
+.bubble.md ul,.bubble.md ol{margin:6px 0 8px;padding-left:22px}
+.bubble.md li{margin:3px 0}
+.bubble.md code{background:rgba(127,127,127,.18);padding:1px 5px;border-radius:4px;font-family:Consolas,Monaco,monospace;font-size:12px;word-break:break-all}
+.bubble.md pre{background:rgba(127,127,127,.14);padding:10px 12px;border-radius:6px;overflow-x:auto;margin:8px 0}
+.bubble.md pre code{background:none;padding:0;white-space:pre;word-break:normal}
+.bubble.md .tw{overflow-x:auto;margin:10px 0;border-radius:6px}
+.bubble.md table{border-collapse:collapse;font-size:12px;line-height:1.55;min-width:100%}
+.bubble.md th,.bubble.md td{border:1px solid var(--bdr);padding:5px 9px;text-align:left;vertical-align:top}
+.bubble.md th{background:rgba(127,127,127,.16);font-weight:700;white-space:nowrap}
+.bubble.md tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+.bubble.md blockquote{border-left:3px solid var(--red);margin:8px 0;padding:2px 0 2px 10px;opacity:.9}
+.bubble.md blockquote>p{margin:0 0 6px}
+.bubble.md hr{border:none;border-top:1px solid var(--bdr);margin:12px 0}
+.bubble.md a{color:var(--red);text-decoration:underline;word-break:break-all}
+.bubble.md strong{font-weight:700}.bubble.md del{opacity:.6}
+/* ===== 顶部数据状态条 ===== */
+.data-status{font-size:11px;color:var(--t2);padding:5px 20px;background:var(--card);border-bottom:1px solid var(--bdr);line-height:1.5}
+.data-status b{color:var(--txt);font-weight:600}
+
+/* ===== 开局引导表单 ===== */
+.intake{max-width:660px;margin:18px auto;padding:22px 24px;background:var(--card);border:1px solid var(--bdr);border-radius:12px;position:relative;z-index:1}
+.intake h3{font-size:17px;margin-bottom:4px}
+.intake .hint{font-size:12px;color:var(--t2);margin-bottom:16px;line-height:1.6}
+.intake .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:11px}
+.intake .fld{flex:1;min-width:150px}
+.intake label{display:block;font-size:11px;color:var(--t2);margin-bottom:4px}
+.intake select,.intake input{width:100%;padding:9px 10px;border:1px solid var(--bdr);border-radius:6px;font:inherit;font-size:13px;background:var(--bg);color:var(--txt);outline:none}
+.intake select:focus,.intake input:focus{border-color:var(--red)}
+.intake .go{width:100%;padding:12px;background:var(--red);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px}
+.intake .go:hover{opacity:.9}
+.intake .err{color:var(--red);font-size:12px;margin-top:8px;min-height:18px}
+.intake .seg,.intake .chips{display:flex;gap:6px;flex-wrap:wrap}
+.intake .seg button,.intake .chip{padding:7px 12px;font-size:12px;border:1px solid var(--bdr);background:var(--bg);color:var(--txt);border-radius:6px;cursor:pointer;line-height:1.2;font-family:inherit;white-space:nowrap}
+.intake .seg button:hover,.intake .chip:hover{border-color:var(--red);color:var(--red)}
+.intake .seg button.on,.intake .chip.on{background:var(--red);color:#fff;border-color:var(--red)}
+.intake .chips .chip{padding:5px 10px;font-size:11px;border-radius:12px}
+.intake .range{display:flex;align-items:center;gap:8px}
+.intake .range input{flex:1;min-width:0;text-align:center}
+.intake .range .sep,.intake .range .unit{font-size:12px;color:var(--t2);flex:none}
+.intake .combo{margin-top:7px;font-size:11px;color:var(--t2);line-height:1.6}
+.intake .combo b{color:var(--red);font-weight:600}
+.intake .combo.warn{color:#b3452f}
+.intake .rankline{display:flex;align-items:center;gap:10px;min-height:34px}
+.intake .rhint{font-size:12px;color:var(--t2);line-height:1.6}
+.intake .rhint b{color:var(--txt);font-weight:600}
+.intake .lnk{font-size:11px;color:var(--t2);background:none;border:1px dashed var(--bdr);border-radius:5px;padding:2px 8px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.intake .lnk:hover{color:var(--red);border-color:var(--red)}
+.helpbox{background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:18px 22px;width:min(720px,92vw);max-height:82vh;overflow:auto}
+.helpbox h3{margin:0 0 4px}
+.helpbox .hsub{font-size:11px;color:var(--t2);margin-bottom:14px}
+.helpbox .hsec{margin:14px 0 0}
+.helpbox .hsec h4{font-size:13px;margin:0 0 6px;display:flex;align-items:center;gap:6px}
+.helpbox .hsec p{margin:0 0 6px;font-size:12px;line-height:1.75;color:var(--txt)}
+.helpbox .hsec p.k{color:var(--t2)}
+.helpbox .hsec code{background:var(--side);border-radius:3px;padding:0 4px;font-size:11px}
+.helpbox .btns{margin-top:18px}
+.tiphelp{color:var(--red);cursor:pointer;text-decoration:underline;white-space:nowrap}
+.intake .more{display:inline-block;font-size:11px;color:var(--t2);cursor:pointer;user-select:none;margin:0 0 10px}
+.intake .more:hover{color:var(--red)}
+.rc-subj{font-size:11px;padding:7px 12px;line-height:1.7;border-bottom:1px solid var(--bdr);background:rgba(46,125,50,.06)}
+.rc-subj.warn{background:rgba(208,64,64,.07)}
+.rc-subj b{color:var(--red)}
+.rc-subj .mini{color:var(--t2)}
+.rc-need{font-weight:600}
+.rc-zone-up{color:var(--red)}
+.rc-zone-ok{color:#2e7d32}
+.rc-zone-lo{color:var(--t2)}
+.rc .tagprelim{font-style:normal;font-size:10px;color:#b26a00;border:1px solid #d99b3d;border-radius:3px;padding:0 3px;margin-left:4px;vertical-align:1px}
+.rc .tagnat{font-style:normal;font-size:10px;color:#7a4b00;background:#fff3d6;border:1px solid #e0b667;border-radius:3px;padding:0 3px;margin-left:4px;vertical-align:1px}
+.dark .rc .tagnat{background:rgba(224,182,103,.16);border-color:#8a6a2c;color:#f0d9a8}
+.rc .z{font-style:normal;font-size:10px;border-radius:3px;padding:0 3px;margin-right:2px;white-space:nowrap;display:inline-block}
+.rc .zchong{color:#b3452f;background:rgba(208,64,64,.10)}
+.rc .zwen{color:#1f6f3f;background:rgba(46,125,50,.12)}
+.rc .zbao{color:#2a5d9f;background:rgba(42,93,159,.10)}
+.dark .rc .zchong{color:#f0a08c;background:rgba(208,64,64,.20)}
+.dark .rc .zwen{color:#9adbaa;background:rgba(46,125,50,.22)}
+.dark .rc .zbao{color:#9dc2ef;background:rgba(42,93,159,.22)}
+.rc .zone-bs{outline:1px dashed #d99b3d;outline-offset:-2px}
+.rc .zno{opacity:.4}
+.rc .tagg{font-style:normal;font-size:10px;color:#1f6f3f;background:rgba(46,125,50,.12);border:1px solid #9ccfa8;border-radius:3px;padding:0 3px;margin-left:4px;vertical-align:1px}
+.rc .tagg.zero{color:#b3452f;background:rgba(208,64,64,.10);border-color:#e0a79b}
+.dark .rc .tagg{background:rgba(46,125,50,.22);border-color:#3f6b4a;color:#9adbaa}
+.rg{margin-top:10px;border-top:1px dashed var(--bdr);padding-top:8px}
+.rg-hd{font-size:11px;color:var(--sub);margin-bottom:6px;line-height:1.6}
+.rg-hd b{color:var(--txt)}
+.rg table{width:100%;border-collapse:collapse;font-size:11px}
+.rg th{background:rgba(0,0,0,.03);font-weight:600;text-align:left;padding:4px 6px;white-space:nowrap}
+.dark .rg th{background:rgba(255,255,255,.05)}
+.rg td{padding:4px 6px;border-top:1px solid var(--bdr);vertical-align:top}
+.rg td.n{text-align:right;white-space:nowrap}
+.rg td:first-child,.rg td:nth-child(2){white-space:nowrap}
+.rg tr.off td{opacity:.42}
+.rg .req{color:#b26a00;white-space:nowrap}
+.rg .bat{font-size:9px;border:1px solid #b3452f;color:#b3452f;border-radius:2px;padding:0 2px;margin-left:3px}
+.rg .maj{color:var(--sub)}
+.rg-empty{font-size:11px;opacity:.7;padding:6px 0}
+.rg-more{margin-top:6px;font-size:11px;padding:3px 12px;border:1px dashed var(--bdr);background:none;color:var(--t2);border-radius:12px;cursor:pointer;font-family:inherit}
+.rg-more:hover{border-color:var(--red);color:var(--red)}
+.rc-rank{opacity:.62}
+
+/* ===== 结果卡片 ===== */
+.bubble.a.wide{max-width:97%}
+.rc{margin-top:10px;border:1px solid var(--bdr);border-radius:8px;overflow:hidden;background:var(--card)}
+.rc-hd{display:flex;align-items:baseline;gap:10px;padding:9px 12px;background:var(--side);border-bottom:1px solid var(--bdr);flex-wrap:wrap}
+.rc-hd b{font-size:15px}
+.rc-hd span{font-size:11px;color:var(--t2)}
+.rc-tabs{display:flex;gap:6px;padding:9px 12px 0;flex-wrap:wrap}
+.rc-tabs button{padding:5px 14px;font-size:12px;border:1px solid var(--bdr);background:var(--bg);color:var(--txt);border-radius:14px;cursor:pointer}
+.rc-tabs button.on{background:var(--red);color:#fff;border-color:var(--red)}
+.rc-flt{display:flex;gap:6px;padding:9px 12px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--bdr)}
+.rc-flt button{padding:3px 10px;font-size:11px;border:1px solid var(--bdr);background:var(--bg);color:var(--t2);border-radius:10px;cursor:pointer}
+.rc-flt button.on{background:var(--txt);color:var(--bg);border-color:var(--txt)}
+.rc-flt .sp{flex:1}
+.rc-tw{overflow-x:auto;max-height:520px;overflow-y:auto}
+.rc table{width:100%;border-collapse:collapse;font-size:12px}
+.rc th,.rc td{padding:6px 10px;border-bottom:1px solid var(--bdr);text-align:left;white-space:nowrap}
+.rc th{font-size:11px;color:var(--t2);font-weight:600;background:var(--bg);position:sticky;top:0;z-index:1}
+.rc tbody tr:hover{background:rgba(127,127,127,.08)}
+.rc td.n{font-variant-numeric:tabular-nums}
+.rc .neg{color:var(--red)}.rc .pos{color:#2e7d32}
+.rc .tag985{font-style:normal;font-size:10px;color:var(--red);border:1px solid var(--red);border-radius:3px;padding:0 3px;margin-left:5px;vertical-align:1px}
+.rc .tag211{font-style:normal;font-size:10px;color:var(--t2);border:1px solid var(--bdr);border-radius:3px;padding:0 3px;margin-left:4px;vertical-align:1px}
+.rc-ft{padding:7px 12px;font-size:11px;color:var(--t2);border-top:1px solid var(--bdr);background:var(--bg);line-height:1.6}
+.rc-empty{padding:18px;text-align:center;color:var(--t2);font-size:12px}
+
+/* 数据依据折叠 */
+details.basis{margin-top:8px;font-size:12px;color:var(--t2)}
+details.basis summary{cursor:pointer;outline:none;user-select:none}
+details.basis pre{white-space:pre-wrap;font-size:11px;line-height:1.65;background:rgba(127,127,127,.08);padding:9px 11px;border-radius:6px;margin-top:6px;max-height:280px;overflow:auto;font-family:inherit}
+
+/* 加载气泡阶段提示 */
+.bubble .stage{font-size:12px;color:var(--t2);margin-right:6px}
+
+/* 发送区 */
+.inp .stop{display:none;background:var(--txt);color:var(--bg)}
+.inp.busy .send{opacity:.45;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(20,20,20,.92);color:#fff;font-size:12px;padding:9px 16px;border-radius:8px;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+/* ===== 志愿草稿篮 ===== */
+.draftbar{display:none;align-items:center;gap:10px;padding:8px 20px;background:var(--side);border-top:1px solid var(--bdr);font-size:12px;flex-wrap:wrap}
+.draftbar .db-main{font-size:13px}
+.draftbar .db-main b{color:var(--red);font-size:15px}
+.draftbar .sp{flex:1}
+.draftbar button{padding:6px 14px;font-size:12px;border:1px solid var(--bdr);background:var(--card);color:var(--txt);border-radius:6px;cursor:pointer}
+.draftbar button:hover{border-color:var(--red)}
+.draftbar .db-go{background:var(--red);color:#fff;border-color:var(--red);font-weight:600}
+.draftbar .db-warn{color:var(--red);font-weight:600}
+.draftbar .db-tip{color:var(--t2)}
+.rc-add{padding:2px 9px;font-size:12px;border:1px solid var(--bdr);background:var(--bg);color:var(--t2);border-radius:4px;cursor:pointer;line-height:1.4}
+.rc-add:hover{border-color:var(--red);color:var(--red)}
+.rc-add.on{background:var(--green);border-color:var(--green);color:#fff;cursor:default}
+#draftOverlay>div{width:min(980px,94vw)!important;max-height:88vh;display:flex;flex-direction:column;padding:20px 22px}
+.draftbox h3 .dc{font-size:12px;color:var(--t2);font-weight:400;margin-left:8px}
+.draftwarn{margin:8px 0}
+.dw-i{font-size:12px;color:var(--red);background:rgba(208,64,64,.08);padding:8px 10px;border-radius:6px;line-height:1.7}
+.dw-ok{font-size:12px;color:var(--green)}
+.drafttw{overflow:auto;flex:1;border:1px solid var(--bdr);border-radius:6px;margin-top:4px}
+.drafttw table{width:100%;border-collapse:collapse;font-size:12px}
+.drafttw th,.drafttw td{padding:6px 10px;border-bottom:1px solid var(--bdr);text-align:left;white-space:nowrap}
+.drafttw th{background:var(--bg);color:var(--t2);font-size:11px;position:sticky;top:0;z-index:1}
+.drafttw .neg{color:var(--red)}.drafttw .pos{color:#2e7d32}
+.drafttw td.nw button{padding:2px 8px;margin-right:4px;font-size:11px;border:1px solid var(--bdr);background:var(--bg);color:var(--txt);border-radius:4px;cursor:pointer}
+.drafttw td.nw button:hover{border-color:var(--red);color:var(--red)}
+.drafttw .bd{font-size:11px;padding:1px 8px;border-radius:8px}
+.drafttw .dcity{font-size:10px;color:var(--t2);margin-top:1px}
+.dw-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--side);margin:4px 0 8px}
+.dw-bar .bc{display:block;height:100%}
+.dw-bar .bc-chong{background:#d04040}
+.dw-bar .bc-wen{background:#2f8f4e}
+.dw-bar .bc-bao{background:#3a6ea5}
+.bd-chong{background:#fde2e2;color:#c0392b}
+.bd-wen{background:#e3f1e3;color:#2e7d32}
+.bd-bao{background:#e3edf8;color:#2f5f9e}
+/* ===== 第二批优化 ===== */
+.rc-hd .sp{flex:1}
+.rc-q{padding:3px 10px;font-size:11px;border:1px solid var(--bdr);background:var(--bg);color:var(--txt);border-radius:12px;cursor:pointer;margin-left:4px}
+.rc-q:hover{border-color:var(--red);color:var(--red)}
+.rc-tip{font-size:11px;color:#b3452f;background:rgba(208,64,64,.08);padding:6px 12px;line-height:1.65;border-bottom:1px solid var(--bdr)}
+.rc-tip .tipb{opacity:.72;margin-left:10px}
+.rc-tip .tiphelp{margin-left:10px;color:var(--red);text-decoration:underline;cursor:pointer;white-space:nowrap}
+.rc-flt .sp{flex:1}
+.rc tbody tr.rc-row{cursor:pointer}
+tr.rc-hist td{background:rgba(127,127,127,.07);font-size:11px;color:var(--t2);white-space:normal;padding:8px 12px}
+.rh{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.rh-i b{color:var(--txt)}
+.rh-tip{opacity:.7}
+.mini{font-weight:400;color:var(--t2);font-size:10px}
+.live-body{min-height:1.2em}
+.live-body>p:last-child{margin-bottom:0}
+.dark .rc-tip{color:#f0a08c}
+/* ===== 体感优化 ===== */
+.rc-tw{max-height:min(70vh,640px)}
+.rc td.n,.rc th.n,.drafttw td.n{font-variant-numeric:tabular-nums}
+.rc tbody tr.rc-row.alt{background:rgba(127,127,127,.035)}
+.rc .rc-city{font-size:10px;color:var(--t2);margin-top:1px}
+.rc .z.zmuted{background:none;color:var(--t2);opacity:.55;padding:0}
+.rc-row.rc-sel{outline:2px solid var(--red);outline-offset:-2px}
+.rc-search{flex:0 0 auto;width:170px;padding:3px 10px;font-size:11px;border:1px solid var(--bdr);border-radius:12px;background:var(--bg);color:var(--txt);font-family:inherit}
+.skel{padding:16px 18px;width:100%}
+.skel .sk{height:13px;border-radius:6px;background:linear-gradient(90deg,var(--side) 25%,var(--bdr) 37%,var(--side) 63%);background-size:400% 100%;animation:shimmer 1.1s infinite linear;margin-bottom:11px}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+.undo-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;background:var(--card);border:1px solid var(--bdr);border-radius:22px;padding:8px 16px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.16);display:none;align-items:center;gap:12px;z-index:60}
+.undo-bar.show{display:flex}
+.undo-bar button{font-size:12px;padding:3px 12px;border-radius:14px;border:1px solid var(--red);background:none;color:var(--red);cursor:pointer}
+.undo-bar button:hover{background:var(--red);color:#fff}
+.ex-wrap{margin-top:18px;border-top:1px dashed var(--bdr);padding-top:14px}
+.ex-t{font-size:11px;color:var(--t2);margin-bottom:9px}
+.ex-list{display:flex;gap:8px;flex-wrap:wrap}
+.ex-card{text-align:left;padding:9px 13px;border:1px solid var(--bdr);border-radius:8px;background:var(--bg);color:var(--txt);cursor:pointer;font-family:inherit;font-size:12px;line-height:1.5}
+.ex-card:hover{border-color:var(--red);color:var(--red)}
+.ex-card .ex-m{font-size:10px;color:var(--t2);display:block;margin-top:2px}
+body.big .main{zoom:1.08}
+body.big .side{zoom:1.04}
+</style></head><body>
+<div class="side"><h2>雪峰Agent v3</h2><div class="sub">AI高考志愿顾问</div>
+<div class="list" id="chatList"></div><div class="new-btn" id="newBtn">+ 新建对话</div></div>
+<div class="main"><div class="bar"><span class="logo">雪峰Agent</span>
+<button id="btnG" class="on">报考</button><button id="btnF">娱乐</button>
+<img id="avt" src="/img_suit.png"><button id="bigBtn" title="大字模式（家长看着更清楚）">A+</button><button id="themeBtn">🌓</button><button class="api-btn" id="apiBtn">API设置</button></div>
+<div class="undo-bar" id="undoBar"><span id="undoTxt"></span><button id="undoBtn">撤销</button></div>
+<div class="data-status" id="dataStatus">位次引擎状态检测中…</div>
+<div class="msgs" id="msgArea"><div class="welcome"><div class="icon">🎓</div><h2>报考模式</h2><p>输入分数省份位次帮你盘志愿</p></div></div>
+<div class="draftbar" id="draftBar"></div>
+<div class="inp" id="inpBar"><textarea id="inp" placeholder="例：湖南 物理类 600分 位次18876，想学计算机，不学生化环材"></textarea><button class="stop" id="stopBtn">停止</button><button class="send" id="sendBtn">发送</button></div></div>
+<div class="overlay" id="setOverlay"><div><h3>API设置</h3>
+<label>Base URL</label><input id="sUrl" placeholder="https://api.deepseek.com">
+<label>API Key</label><input type="password" id="sKey" placeholder="sk-...">
+<label>Model</label><input id="sModel" placeholder="deepseek-chat">
+<label>Tavily Key <span style="color:var(--red);font-size:11px;font-weight:600">(选填，但强烈推荐)</span></label><input type="password" id="sTav" placeholder="tvly-..."><div style="background:var(--side);border-radius:6px;padding:8px 10px;margin:4px 0 8px;font-size:11px;line-height:1.6;color:var(--txt)"><b>做什么的？</b> AI联网搜索引擎，比百度精准10倍，专为AI设计。<br><b>为什么推荐？</b> 填了之后Agent会自动搜索最新分数线、学校环境、王牌专业、就业薪资——回答质量天差地别。<br><b>要钱吗？</b> 免费额度每月1000次，正常使用完全够。<br><b>怎么获取？</b> 打开 <a href=\"https://tavily.com\" target=\"_blank\" style=\"color:var(--red);font-weight:600\">tavily.com</a> → 点 Get Started（Google/GitHub账号直接登）→ 复制 tvly- 开头的Key → 粘贴到这里。<br><b>不填行不行？</b> 行，但联网搜索基本废了（百度反爬），建议花1分钟注册。</div>
+<div class="btns"><button id="closeSetBtn">取消</button><button class="ok" id="testBtn">保存并测试</button></div><div class="st" id="st"></div></div></div>
+<div class="overlay" id="draftOverlay"><div class="draftbox">
+<h3>我的志愿表 <span class="dc" id="draftCount"></span></h3>
+<div class="draftwarn" id="draftWarn"></div>
+<div class="drafttw"><table>
+<thead><tr><th>序号</th><th>档位</th><th>院校</th><th>需考到</th><th>位次</th><th>差几分</th><th>近三年</th><th>学费</th><th>专业组</th><th>操作</th></tr></thead>
+<tbody id="draftBody"></tbody></table></div>
+<div class="btns" style="margin-top:14px"><button data-db="clear">清空</button><button class="ok" data-db="export">导出 Excel</button><button data-db="close">关闭</button></div>
+</div></div>
+<div class="overlay" id="helpOverlay"><div class="helpbox">
+<h3>口径说明</h3>
+<div class="hsub">这个工具里每个数字是怎么来的、哪些是数据、哪些是判断。看一次就够。</div>
+
+<div class="hsec"><h4>① 分数区间 → 位次区间</h4>
+<p>你填的是<b>预估分数区间</b>（如 585–605），系统用<b>同一年</b>的一分一段表换算成位次区间（如 16,521–26,952）。</p>
+<p class="k">为什么不能混年：同一个 600 分，湖南物理 2024 是 14,294 名、2026 是 18,876 名，差 4,600 名。混年换算会把误差放大成结论。</p>
+</div>
+
+<div class="hsec"><h4>② 「需考到」不是你能读那个专业的分数</h4>
+<p>它是该校（或该专业组）<b>最低录取分</b>，通常来自<b>最冷门</b>的那个专业组。考到这个分只是「能进档」，不代表能读你想报的专业。</p>
+<p class="k">要查具体专业分数，得看专业组那一行（点开院校名），或者查省考试院、掌上高考。</p>
+</div>
+
+<div class="hsec"><h4>③ 冲 / 稳 / 保 怎么分</h4>
+<p><b>冲</b>：该校线位次比你区间上端还靠前，要靠超常发挥。<b>稳</b>：落在你的区间内。<b>保</b>：比你的区间下端还靠后，兜底用。</p>
+<p class="k">参考比例：冲 20% / 稳 50% / 保 30%，保底至少 3 所。</p>
+</div>
+
+<div class="hsec"><h4>④ 「近三年」= 三年分档次数，不是概率</h4>
+<p>把该校 2024 / 2025 / 2026 三年的录取位次，<b>分别按你同一个区间</b>归到冲、稳、保，再数次数：<code>稳2 冲1</code> = 三年里有两年落在你区间内。</p>
+<p class="k">只数次数、不给百分比——三年样本撑不出「录取概率 80%」。虚线框 ＝ 三年里既进过冲又进过保（大小年），这种别当保底。</p>
+</div>
+
+<div class="hsec"><h4>⑤ 「可报 4/4」和专业组</h4>
+<p>湖南、广东的填报单位是<b>院校专业组</b>（本科批 45 个组，每组 6 个专业 + 1 个服从调剂）。<code>可报 4/4</code> 表示该校 4 个组里你能报 4 个。</p>
+<p class="k">组数据取自掌上高考 2025 年招生计划与分专业录取线；位次已换算成 2026 年等效口径。还没选满 2 门再选科目时，按最宽口径只提示、不剔除。</p>
+</div>
+
+<div class="hsec"><h4>⑥ 「军」「警」「中外合作」「民办」</h4>
+<p><b>军 / 警</b>：提前批，要政审 + 体检 + 面试，录取线不能和本科批直接比，别当保底。</p>
+<p><b>中外合作 / 民办</b>：高学费。中外合作普遍 4~9 万/年，普通公办约 5 千/年。具体以招生章程为准。</p>
+</div>
+
+<div class="hsec"><h4>⑦ 数据来源与缺口</h4>
+<p>一分一段表：省考试院；校线：掌上高考；专业组：掌上高考招生计划与分专业录取线。</p>
+<p class="k">专业组数据还在补，目前只覆盖部分学校——没有「可报 X/Y」徽标的学校，表示还没有组数据，不是没有专业组。</p>
+</div>
+
+<div class="btns"><button class="ok" onclick="document.getElementById('helpOverlay').style.display='none'">知道了</button></div>
+</div></div>
+<div class="overlay" id="queryOverlay"><div style="width:min(640px,92vw)!important">
+<h3>改条件重算</h3>
+<div style="font-size:12px;color:var(--t2);margin-bottom:14px;line-height:1.6">改完点「重新算」，会在当前对话里追加一轮新结果，上一轮记录不会丢。</div>
+<div id="queryFields" class="intake" style="max-width:none;margin:0;padding:0;border:none;background:transparent"></div>
+<div class="btns"><button id="queryClose">取消</button><button class="ok" id="queryGo">重新算</button></div>
+<div class="err" id="queryErr" style="color:var(--red);font-size:12px;margin-top:8px;min-height:16px"></div>
+</div></div>
+<script>
+var chats,curId,mode;try{chats=JSON.parse(localStorage.getItem('xf_chats')||'{}');}catch(e){chats={};localStorage.removeItem('xf_chats');}curId=localStorage.getItem('xf_cur')||'';mode=localStorage.getItem('xf_mode')||'gaokao';
+var PG="现在是2026年10月，2027届考生正在做准备，2027年高考尚未进行。你正在帮助2027届考生与家长做志愿规划。你是资深高考志愿规划师，风格直爽接地气，像张雪峰一样。\n\n【核心规则】\n1. 省份志愿政策感知(2025年起全部新高考)：\n   专业+院校(浙江80/山东96/河北96/重庆96/辽宁112)→推荐至少30-50所\n   院校+专业组(江苏40/广东45/湖北45/湖南45/福建40/北京30/天津50/上海24/海南24/河南48/四川45/陕西45/山西45/云南40/贵州45/内蒙古45/安徽45/江西45/黑龙江40/吉林40/广西40/甘肃45/新疆45/宁夏45/青海45/西藏45)→推荐填满80%+\n2. 冲稳保比例：冲20%稳50%保30%，保底至少3个\n3. 用户提供的数据默认准确不质疑不反问。若有自定义数据表，冲稳保只推荐表内学校不准推荐表外学校，补充建议可提网络搜索学校但须明确标注仅供参考（你确定吗）。即使和数据库对不上，也按用户说的来，数据库只做参考。\n4. 数据使用铁律：\n   - [真实录取数据]里的每条都来自考试院官方，逐条引用标注省份年份位次分数\n   - [联网搜索]数据标注\"据网上公开信息，仅供参考\"\n   - 数据库和联网搜索都没数据的学校，直接说\"暂无该校数据\"，绝对禁止编造任何分数和位次数字！只能推荐DB数据或联网搜索里实际出现的学校，两个来源都没有的学校可以说名字但不准给分数位次。\n   - 【死命令】如果DB返回空+联网也没搜到具体位次，你只能说\"建议查省考试院官网\"，不准说'据网上公开信息约XXX分'来模糊编造。没有就是没有。\n4. 方向推荐铁律（极其重要！）：\n   - 用户这次**不会**告诉你「想学什么专业」——工具的目的就是帮他判断学什么。禁止反问「你想学什么专业」。\n   - 你的任务是结合：分数区间 + 选科组合 + 用户勾的「更在乎什么」+ 明确排斥的方向，给出 3 个专业方向建议。\n   - 用户勾了「不接受的方向」（如土木/化工/护理等）就一律过滤掉，提都不要提。\n   - 方向判断属于经验判断（就业面/考研/考公/性价比），不是录取数据；凡涉及分数位次一律引用表格。\n5. 普通家庭优先技术类(计算机/软件/电子/电气/自动化/机械)。无公检法资源慎选法学\n6. 生化环材土木护理等天坑专业主动提醒用户避开\n\n【回答结构】\n名单和分数已由界面表格展示，绝对不要复述表格里的学校名单、分数、位次，也不要重复画表格。你只写判断：\n第1步 一句话定位：本省政策 + 这个分数区间大概能到哪个层次（985边缘 / 优质211 / 强双非之类）\n第2步 选科能报什么：指出哪些方向的门已经关了、哪些还开着（依据选科规则，别编数据）\n第3步 推荐 3 个专业方向：[方向候选] 里已经给了若干个，只从里面挑 3 个，不要自己另编方向；每个方向写「为什么这个分数段读它划算（就业面/考研/考公/性价比）」+「在他们区间内能碰到的最好院校 3 所（只能用表格里出现的）」+「这个方向最大的坑」\n第4步 最大风险：专业组调剂、滑档、边远地域、学费、天坑方向\n第5步 还缺哪些关键信息，最多追问 2 个\n排序依据：用户勾的「更在乎什么」（就业薪资/考公稳定/读研深造/离家近/学校牌子/城市发展）。只给 3 个方向，给多了等于没建议。\n\n【重要】表格里的「需考到」（区间版）或「全校最低分」（单点版）都是该校最低门槛，通常是冷门专业组，不等于用户想报那个专业的分数——凡涉及具体专业必须提醒这一点。带「军/警」标记的是提前批，要政审体检面试，不能和本科批混着比。表格里的「近三年」= 该校 2024~2026 三年的录取位次按你同一个区间各归一次档再数次数（如 稳2冲1），**禁止把它换算成百分比概率**（不许说「录取概率 80%」「稳录」），只能原样引用「三年里有 2 年落在稳档」；「中外合作/民办」标的是高学费院校，要主动提醒学费量级（中外合作常 4~9 万/年）并问家里能否接受。没有表格数据时，才按冲稳保口头给建议，并明确说明数据缺失，绝不编造分数位次。\n\n【追问规则】回答末尾必须检查这些信息是否清楚（不全就问，全就不问）：\n1.预估分数区间（不是精确分） 2.选科组合（首选+再选2门） 3.家里在哪/想去哪 4.父母做什么+年收入 5.家里有没有公检法/电网/医疗/教育系统的资源 6.考研还是直接就业 7.接不接受调剂 8.学费接受范围（普通家庭中外合作慎推）。从缺失的信息里挑1-2个最关键的，用自然的口吻追问，给出提问模板。\n\n【禁止】绝对不要问「你想学什么专业」——这次工具的目的就是帮用户判断学什么，问了就自相矛盾。";
+var PF="你是张雪峰本人，不是AI。东北口音贼快，一拍桌子就开始说。巧乐兹三口一个，雪碧喝口润润嗓。我是你牢峰，跑不过我——半马PB一小时四十七。\n\n风格核心：狂妄自大但不让人讨厌，用段子讲大实话。先笑再怼，怼完给条路。拍桌子是开场动作，说到激动处猛喝一口雪碧。\n\n经典语录随口就来：新闻学？来来来你过来我给你打晕了别报。文科？那不就是服务业嘛，舔。生化环材土木，四大天坑谁学谁后悔。428分？我说你命好。18999的圆梦卡来一张不？齐齐哈尔大学我用生命给你担保。考编不异地、异地不乡镇。\n\n遇到艺术生：哎哟我天，又来个学艺术的。艺术生这个事儿啊，你学啥都差不多——美术学、艺术史、设计，出来都是无限循环。学美术史的出来教美术史，教出来的学生再学美术史，闭环了属于是。别指望我给你什么报考建议，艺术这玩意儿看命，你爹要是画家你学什么都行。\n\n遇到低分：你这分啊，咱说实话，不是挑学校的问题，是学校挑不挑你的问题。但别慌，428分也有428分的活法。\n\n遇到高分：分挺高啊，但别飘。分高的人最容易犯的错就是瞎冲名校冷门专业，出来还没大专好使。\n\n凡尔赛的怼回去：你650分来问我能不能上大学？你是不是来消遣我的？\n\n东北味随口带：那啥、整、可不咋的、唉呀妈呀、我跟你说。不说作为AI、不说建议您、不碰政治红线、不编造具体数据。";
+
+function S(id){return document.getElementById(id);}
+function setMode(m){mode=m;try{localStorage.setItem('xf_mode',m);}catch(e){}var bg=S('btnG'),bf=S('btnF'),av=S('avt'),ma=S('msgArea');if(bg)bg.className=m==='gaokao'?'on':'';if(bf)bf.className=m==='fun'?'on':'';if(av)av.src=m==='fun'?'/img_scifi.png':'/img_suit.png';if(ma){if(m==='fun')ma.classList.add('fun-bg');else ma.classList.remove('fun-bg');}render();}
+function newChat(){var id=Date.now()+'';chats[id]={name:'新对话',mode:mode,msgs:[]};curId=id;save();render();}
+function delChat(id){delete chats[id];if(curId===id){var ks=Object.keys(chats);curId=ks.length?ks[ks.length-1]:null;if(!curId)newChat();}save();render();}
+function save(){try{localStorage.setItem('xf_chats',JSON.stringify(chats));localStorage.setItem('xf_cur',curId||'');}catch(e){console.warn('save failed:',e.message);toast('本地存储已满：新对话可能存不下，请删掉一些旧对话');}}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+// ===== Markdown 渲染（仅用于助手回复；纯前端实现，不依赖任何外部库/CDN） =====
+function inlineMd(t){
+  var store=[];
+  var s=esc(t||'');
+  s=s.replace(/`([^`\n]+)`/g,function(_,c){store.push(c);return '\u0001C'+(store.length-1)+'\u0001';});
+  s=s.replace(/\*\*([^\n]+?)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/__([^\n_]+?)__/g,'<strong>$1</strong>');
+  s=s.replace(/~~([^\n]+?)~~/g,'<del>$1</del>');
+  s=s.replace(/\*([^\s*][^*\n]*?)\*/g,'<em>$1</em>');
+  s=s.replace(/\[([^\]\n]{1,150})\]\((https?:\/\/[^)\s]+)\)/g,function(_,txt,u){return '<a href="'+u.replace(/"/g,'%22')+'" target="_blank" rel="noopener noreferrer">'+txt+'</a>';});
+  s=s.replace(/\u0001C(\d+)\u0001/g,function(_,n){return '<code>'+store[+n]+'</code>';});
+  return s;
+}
+function md(src){
+  if(src==null)return '';
+  var lines=String(src).replace(/\r\n?/g,'\n').split('\n'),out=[],i=0;
+  function trow(l){return /^\s*\|.*\|\s*$/.test(l);}
+  function sepRow(l){return l.indexOf('|')>=0&&/^[\s|:-]+$/.test(l)&&/-{2,}/.test(l);}
+  function cells(l){return l.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(function(c){return c.trim();});}
+  function isHr(l){return /^\s*([-*_])\s*(?:\1\s*){2,}$/.test(l);}
+  function isOl(l){return /^\s*\d+[.)]\s+/.test(l);}
+  function isUl(l){return /^\s*[-*+]\s+/.test(l);}
+  function isHead(l){return /^\s*#{1,6}\s+/.test(l);}
+  while(i<lines.length){
+    var ln=lines[i],start=i;
+    if(/^\s*$/.test(ln)){i++;continue;}
+    // 围栏代码块
+    if(/^\s*```/.test(ln)){
+      i++;var buf=[];
+      while(i<lines.length&&!/^\s*```/.test(lines[i])){buf.push(lines[i]);i++;}
+      if(i<lines.length)i++;
+      out.push('<pre><code>'+esc(buf.join('\n'))+'</code></pre>');
+      continue;
+    }
+    // 表格（支持标准分隔行，也兼容 AI 常输出的「无分隔行」竖线表格）
+    var sepNext=(i+1<lines.length)&&sepRow(lines[i+1]);
+    if(trow(ln)||sepNext){
+      var rows=[],headerIdx=-1,j=i;
+      if(!trow(ln)){rows.push(cells(ln));headerIdx=0;j=i+2;}
+      while(j<lines.length&&(trow(lines[j])||sepRow(lines[j]))){
+        if(sepRow(lines[j])){if(rows.length===1&&headerIdx<0)headerIdx=0;j++;continue;}
+        rows.push(cells(lines[j]));j++;
+      }
+      if(rows.length>1||headerIdx>=0){
+        i=j;
+        var body=headerIdx>=0?rows.slice(1):rows;
+        var h='<div class="tw"><table>';
+        if(headerIdx>=0)h+='<thead><tr>'+rows[0].map(function(c){return '<th>'+inlineMd(c)+'</th>';}).join('')+'</tr></thead>';
+        h+='<tbody>'+body.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+inlineMd(c)+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table></div>';
+        out.push(h);continue;
+      }
+    }
+    // 标题
+    var hm=ln.match(/^\s*(#{1,6})\s+(.+?)\s*#*\s*$/);
+    if(hm){var lv=hm[1].length;out.push('<h'+lv+'>'+inlineMd(hm[2])+'</h'+lv+'>');i++;continue;}
+    // 分隔线
+    if(isHr(ln)){out.push('<hr>');i++;continue;}
+    // 引用
+    if(/^\s*>/.test(ln)){
+      var qb=[];
+      while(i<lines.length&&/^\s*>/.test(lines[i])){qb.push(lines[i].replace(/^\s*>\s?/,''));i++;}
+      out.push('<blockquote>'+md(qb.join('\n'))+'</blockquote>');continue;
+    }
+    // 列表
+    if(isUl(ln)||isOl(ln)){
+      var ordered=!isUl(ln),items=[];
+      while(i<lines.length){
+        var mm=lines[i].match(ordered?/^\s*\d+[.)]\s+(.+)$/:/^\s*[-*+]\s+(.+)$/);
+        if(!mm)break;
+        items.push('<li>'+inlineMd(mm[1])+'</li>');i++;
+      }
+      out.push((ordered?'<ol>':'<ul>')+items.join('')+(ordered?'</ol>':'</ul>'));continue;
+    }
+    // 段落（保留原有的逐行观感：单个换行 → <br>）
+    var buf=[];
+    while(i<lines.length){
+      var L=lines[i];
+      if(/^\s*$/.test(L)||/^\s*```/.test(L)||isHead(L)||isHr(L)||/^\s*>/.test(L)||isUl(L)||isOl(L)||trow(L))break;
+      buf.push(L);i++;
+    }
+    if(buf.length)out.push('<p>'+inlineMd(buf.join('\n')).replace(/\n/g,'<br>')+'</p>');
+    else i=start+1;
+  }
+  return out.join('');
+}
+// ===== 通用小工具 =====
+function plainText(s){
+  return String(s==null?'':s)
+    .replace(/```[\s\S]*?```/g,' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g,' ')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g,'$1')
+    .replace(/^\s{0,3}#{1,6}\s+/gm,'')
+    .replace(/^\s*>\s?/gm,'')
+    .replace(/[|*`~_#]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+var _toastTimer=null;
+function toast(msg){
+  var el=document.getElementById('toastBox');
+  if(!el){el=document.createElement('div');el.id='toastBox';el.className='toast';document.body.appendChild(el);}
+  el.textContent=msg;el.classList.add('on');
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(function(){el.classList.remove('on');},2600);
+}
+function pushAssistant(txt){
+  if(!curId||!chats[curId])newChat();
+  chats[curId].msgs.push({role:'assistant',content:txt});
+  render();save();
+}
+
+// ===== 开局引导 =====
+var PROV_LIST=['湖南','广东','河南','山东','河北','四川','江苏','浙江','安徽','湖北','福建','江西','陕西','山西','重庆','辽宁','吉林','黑龙江','内蒙古','广西','海南','贵州','云南','西藏','甘肃','青海','宁夏','新疆','北京','天津','上海'];
+var RESEL_LIST=[['chem','化学'],['bio','生物'],['pol','政治'],['geo','地理']];
+var CARE_LIST=[['job','就业薪资'],['gov','考公稳定'],['grad','读研深造'],['near','离家近'],['brand','学校牌子'],['city','城市发展']];
+var AVOID_LIST=[['土木','土木'],['化工','化工'],['护理','护理'],['师范','师范'],['医学','医学'],['农学','农学'],['军警','军警'],['地质','地质'],['法学','法学']];
+var CITY_LIST=[['不限','不限'],['省内','省内'],['长沙','长沙'],['广州','广州'],['武汉','武汉'],['西安','西安'],['成都','成都'],['杭州','杭州'],['北京','北京'],['上海','上海']];
+var CARE_CN={job:'就业薪资',gov:'考公稳定',grad:'读研深造',near:'离家近',brand:'学校牌子',city:'城市发展'};
+var pendingIntake=null,_rrTimer=null;
+function chipHtml(field,items,sel){
+  var s=sel||[],h='';
+  for(var i=0;i<items.length;i++){
+    var on=s.indexOf(items[i][0])>=0?' on':'';
+    h+='<button type="button" class="chip'+on+'" data-f="'+field+'" data-v="'+items[i][0]+'">'+items[i][1]+'</button>';
+  }
+  return h;
+}
+var EXAMPLES=[
+  {label:'湖南 · 物理 · 物化生 · 585–605 分',desc:'先看这个分能上哪些学校',
+   province:'湖南',first:'physics',resel:['chem','bio'],care:['job'],scoreLo:585,scoreHi:605},
+  {label:'广东 · 历史 · 史政地 · 520–540 分',desc:'历史类的选择面长什么样',
+   province:'广东',first:'history',resel:['pol','geo'],care:['gov'],scoreLo:520,scoreHi:540},
+  {label:'湖南 · 物理 · 物生政 · 560–580 分',desc:'没选化学会关掉哪些门',
+   province:'湖南',first:'physics',resel:['bio','pol'],care:[],scoreLo:560,scoreHi:580}
+];
+function renderIntake(){
+  var last={};
+  try{last=JSON.parse(localStorage.getItem('xf_lastintake')||'{}')||{};}catch(e){last={};}
+  var pre={province:last.province,first:last.first,resel:last.resel,
+           care:last.care,avoid:last.avoid,cities:last.cities,adj:last.adj};
+  var ex='';
+  for(var i=0;i<EXAMPLES.length;i++){
+    ex+='<button type="button" class="ex-card" data-example="'+i+'">'+esc(EXAMPLES[i].label)
+      +'<span class="ex-m">'+esc(EXAMPLES[i].desc)+'</span></button>';
+  }
+  return '<div class="intake" data-intake="1">'
+    +'<h3>先填这些，剩下的交给我</h3>'
+    +'<div class="hint">分数不用精确，给个区间就行。填完直接出「冲 / 稳 / 保」三档 —— 按位次分档，每个数字都标年份和来源。</div>'
+    +intakeFieldsHtml(pre)
+    +'<button class="go" data-intake-go="1">开始盘</button>'
+    +'<div class="err" data-err="1"></div>'
+    +'<div class="ex-wrap"><div class="ex-t">或者点一个示例直接看结果：</div><div class="ex-list">'+ex+'</div></div>'
+    +'</div>';
+}
+function applyExample(root,i){
+  var e=EXAMPLES[i];if(!e||!root)return;
+  var psel=root.querySelector('select[data-f="prov"]');
+  if(psel){psel.value=e.province;psel.dispatchEvent(new Event('change',{bubbles:true}));}
+  function chip(f,v){
+    var el=root.querySelector('button[data-f="'+f+'"][data-v="'+v+'"]');
+    if(el&&!el.classList.contains('on'))el.click();
+  }
+  chip('first',e.first);
+  (e.resel||[]).forEach(function(v){chip('resel',v);});
+  (e.care||[]).forEach(function(v){chip('care',v);});
+  var lo=root.querySelector('input[data-f="scoreLo"]');
+  var hi=root.querySelector('input[data-f="scoreHi"]');
+  if(lo){lo.value=e.scoreLo;lo.dispatchEvent(new Event('input',{bubbles:true}));}
+  if(hi){hi.value=e.scoreHi;hi.dispatchEvent(new Event('input',{bubbles:true}));}
+  setTimeout(function(){submitIntake(root);},120);
+}
+function submitIntake(root){
+  root=root||document.querySelector('.intake');
+  if(!root)return;
+  var q=collectIntake(root),err=root.querySelector?root.querySelector('[data-err]'):null;
+  var hasScore=q.scoreLo&&q.scoreHi,hasRank=q.rankLo&&q.rankHi;
+  if(!hasScore&&!hasRank){
+    if(err)err.textContent='分数区间填一下（两个数），或者填位次区间';
+    return;
+  }
+  if(hasScore&&Math.abs(+q.scoreHi-+q.scoreLo)>30){
+    if(err)err.textContent='分数区间太宽了（'+Math.abs(+q.scoreHi-+q.scoreLo)+' 分），冲稳保会不准，建议缩到 20 分以内';
+    return;
+  }
+  if(err)err.textContent='';
+  try{localStorage.setItem('xf_lastintake',JSON.stringify({
+    province:q.province,first:q.first,resel:q.resel,care:q.care,
+    avoid:q.avoid,cities:q.cities,adj:q.adj}));}catch(_e){}
+  if(curId&&chats[curId])chats[curId].lastQuery=q;
+  pendingIntake=q;
+  var inp=S('inp');if(inp)inp.value=intakeToText(q);
+  send();
+}
+function selOf(root,f){
+  var ns=root.querySelectorAll('button[data-f="'+f+'"]'),o=[];
+  for(var i=0;i<ns.length;i++){if(ns[i].classList.contains('on'))o.push(ns[i].getAttribute('data-v'));}
+  return o;
+}
+function valOf(root,f){
+  var e=root.querySelector('[data-f="'+f+'"]');
+  return e?String(e.value||'').trim():'';
+}
+function comboLabel(f,resel){
+  var s=f==='history'?'史':'物';
+  for(var i=0;i<RESEL_LIST.length;i++){if(resel.indexOf(RESEL_LIST[i][0])>=0)s+=RESEL_LIST[i][1].charAt(0);}
+  return s;
+}
+function updateIntakeDerived(root){
+  if(!root||!root.querySelector)return;
+  var f=selOf(root,'first')[0]||'physics',resel=selOf(root,'resel');
+  var box=root.querySelector('[data-combo]');
+  if(box){
+    var hasChem=resel.indexOf('chem')>=0,und=resel.length<2;
+    var txt='你的组合：<b>'+esc(comboLabel(f,resel))+'</b>';
+    if(f==='history')txt+='　<span>理工农医基本进不去，主要看人文社科和管理类</span>';
+    else if(hasChem)txt+='　<span>可报专业面最宽（约 96%）</span>';
+    else if(und)txt='你的组合：<b>还没定</b>　<span>先按最宽口径（含化学）算；若最终没化学，临床/口腔/药学/材料/化工会关闭</span>';
+    else txt+='　<span>没有化学，临床/口腔/药学/材料/化工/生物工程会被「物化绑定」挡掉</span>';
+    box.innerHTML=txt;
+    box.className='combo'+((f!=='history'&&!hasChem&&!und)?' warn':'');
+  }
+  previewRank(root);
+}
+function previewRank(root){
+  var lo=+valOf(root,'scoreLo'),hi=+valOf(root,'scoreHi');
+  var hint=root.querySelector?root.querySelector('[data-rankhint]'):null;
+  if(!(lo&&hi)){if(hint)hint.textContent='';return;}
+  if(lo>hi){var tt=lo;lo=hi;hi=tt;}
+  clearTimeout(_rrTimer);
+  _rrTimer=setTimeout(function(){
+    var tr=selOf(root,'first')[0]==='history'?'history':'physics';
+    var psel=root.querySelector('select[data-f="prov"]');
+    var prov=psel?psel.value:'湖南';
+    fetch('rank-range?province='+encodeURIComponent(prov)+'&track='+tr+'&score_lo='+lo+'&score_hi='+hi)
+      .then(function(r){return r.json();}).then(function(d){
+        if(!d||!d.ok){if(hint)hint.textContent=(d&&d.error)||'换算失败';return;}
+        if(!(root.getAttribute&&root.getAttribute('data-rankmanual'))){
+          var a=root.querySelector('[data-f="rankLo"]'),b=root.querySelector('[data-f="rankHi"]');
+          if(a)a.value=d.rank_lo;if(b)b.value=d.rank_hi;
+        }
+        if(hint){
+          var t='<b>'+d.rank_lo.toLocaleString()+' ~ '+d.rank_hi.toLocaleString()+' 位</b>'
+            +'<span style="opacity:.7">　按 '+d.year+' 年一分一段</span>';
+          if(d.too_wide)t+='<span style="color:#b3452f">　⚠ '+d.width+' 分偏宽，建议缩到 '+d.max_width+' 分以内</span>';
+          else if(d.too_narrow)t+='<span style="color:#b3452f">　⚠ 只差 '+d.width+' 分，不如直接给一个分</span>';
+          hint.innerHTML=t;
+        }
+      }).catch(function(){if(hint)hint.textContent='';});
+  },300);
+}
+document.addEventListener('click',function(e){
+  var t=e.target;if(!t||!t.closest)return;
+  var more=t.closest('[data-more]');
+  if(more){
+    var adv=more.parentNode.querySelector('.adv');
+    if(adv){
+      var isOpen=adv.style.display!=='none';
+      adv.style.display=isOpen?'none':'';
+      more.textContent=isOpen?'▼ 更多条件（不接受的方向 / 城市 / 调剂）':'▲ 收起更多条件';
+    }
+    return;
+  }
+  var re=t.closest('[data-rankedit]');
+  if(re){
+    var root2=re.closest('.intake')||document;
+    var bx=root2.querySelector('[data-rankbox]');
+    if(bx){
+      var open=bx.style.display!=='none';
+      bx.style.display=open?'none':'';
+      re.textContent=open?'手改':'收起';
+      if(!open){
+        var ri=root2.querySelector('[data-f="rankLo"]');
+        if(ri)ri.focus();
+      }
+    }
+    return;
+  }
+  var hb=t.closest('[data-help]');
+  if(hb){openHelp();return;}
+  var rgm=t.closest('[data-rgall]');
+  if(rgm){
+    var box=rgm.closest('.rg');
+    if(box){box.setAttribute('data-all','1');box.innerHTML=grpHtml(box._d,true);}
+    return;
+  }
+  var ex=t.closest('[data-example]');
+  if(ex){applyExample(ex.closest('.intake')||document,+ex.getAttribute('data-example'));return;}
+  var go=t.closest('[data-intake-go]');
+  if(go){submitIntake(go.closest('.intake')||document);return;}
+  var chip=t.closest('.chip');
+  if(!chip)return;
+  var f=chip.getAttribute('data-f');if(!f)return;
+  e.preventDefault();
+  var group=chip.parentNode,root=chip.closest('.intake')||document;
+  if(f==='first'){
+    var bs=group.querySelectorAll('button[data-f="first"]');
+    for(var i=0;i<bs.length;i++){bs[i].classList.toggle('on',bs[i]===chip);}
+  }else if(f==='resel'){
+    if(chip.classList.contains('on'))chip.classList.remove('on');
+    else{
+      if(group.querySelectorAll('button.on').length>=2){toast('再选最多选 2 门');return;}
+      chip.classList.add('on');
+    }
+  }else if(f==='cities'){
+    if(chip.getAttribute('data-v')==='不限'){
+      var on2=group.querySelectorAll('button.on');
+      for(var j=0;j<on2.length;j++){on2[j].classList.remove('on');}
+      chip.classList.add('on');
+    }else{
+      var nx=group.querySelector('button[data-v="不限"]');
+      if(nx)nx.classList.remove('on');
+      chip.classList.toggle('on');
+    }
+  }else{
+    chip.classList.toggle('on');
+  }
+  updateIntakeDerived(root);
+});
+document.addEventListener('input',function(e){
+  var t=e.target;if(!t||!t.getAttribute)return;
+  // 结果表内搜索：记住关键词，重渲染后把焦点还回去
+  var rq=t.getAttribute('data-rcq');
+  if(rq!=null){
+    var ms0=chats[curId]&&chats[curId].msgs;
+    var m0=ms0&&ms0[+rq];
+    if(m0&&m0.engine){
+      m0.engine._ui=m0.engine._ui||{};
+      m0.engine._ui.q=t.value;
+      m0.engine._ui.sel=null;
+      clearTimeout(window._rqT);
+      window._rqT=setTimeout(function(){
+        render();
+        var n=document.querySelector('[data-rcq="'+rq+'"]');
+        if(n){
+          n.focus();
+          try{n.setSelectionRange(n.value.length,n.value.length);}catch(_e){}
+        }
+      },180);
+    }
+    return;
+  }
+  var f=t.getAttribute('data-f');
+  var root=t.closest('.intake')||document;
+  if(f==='scoreLo'||f==='scoreHi'){
+    if(root.removeAttribute)root.removeAttribute('data-rankmanual');
+    updateIntakeDerived(root);
+  }else if(f==='rankLo'||f==='rankHi'){
+    if(root.setAttribute)root.setAttribute('data-rankmanual','1');
+  }
+});
+document.addEventListener('change',function(e){
+  var t=e.target;if(!t||!t.getAttribute)return;
+  if(t.getAttribute('data-f')==='prov'){
+    var root=t.closest('.intake')||document;
+    if(root.removeAttribute)root.removeAttribute('data-rankmanual');
+    previewRank(root);
+  }
+});
+
+// ===== 键盘流：/ 聚焦 · j k 选行 · Enter 加入 · 1 2 3 切档 · Esc 关闭 =====
+function lastEngineMsg(){
+  var ms=chats[curId]&&chats[curId].msgs;
+  if(!ms)return null;
+  for(var i=ms.length-1;i>=0;i--){if(ms[i]&&ms[i].engine)return {eng:ms[i].engine,idx:i};}
+  return null;
+}
+function moveSel(d){
+  var E=lastEngineMsg();if(!E)return;
+  var ui=E.eng._ui||(E.eng._ui={});
+  var list=rcList(E.eng).arr;
+  if(!list.length)return;
+  var cur=(ui.sel==null)?-1:ui.sel;
+  var nx=cur+d;
+  if(nx<0)nx=0;
+  if(nx>=list.length)nx=list.length-1;
+  ui.sel=nx;
+  render();
+  var el=document.querySelector('.rc-row.rc-sel');
+  if(el&&el.scrollIntoView){try{el.scrollIntoView({block:'nearest'});}catch(_e){}}
+}
+function addSel(){
+  var E=lastEngineMsg();if(!E)return;
+  var ui=E.eng._ui||{};
+  var list=rcList(E.eng).arr;
+  if(ui.sel==null||!list[ui.sel]){toast('先用 j / k 选一行，再按 Enter 加入');return;}
+  addToDraft(E.idx,list[ui.sel].schoolId);
+}
+document.addEventListener('keydown',function(e){
+  var tg=e.target||{};
+  var tag=(tg.tagName||'');
+  var typing=(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||tg.isContentEditable);
+  if(e.key==='Escape'){
+    var ids=['helpOverlay','setOverlay','draftOverlay','queryOverlay'];
+    for(var i=0;i<ids.length;i++){
+      var n=S(ids[i]);
+      if(n&&n.style.display==='flex'){n.style.display='none';return;}
+    }
+    var E0=lastEngineMsg();
+    if(E0&&E0.eng._ui&&E0.eng._ui.sel!=null){E0.eng._ui.sel=null;render();}
+    return;
+  }
+  if(typing)return;
+  if(e.key==='/'){
+    e.preventDefault();
+    var inp=S('inp');if(inp)inp.focus();
+    return;
+  }
+  var E=lastEngineMsg();if(!E)return;
+  var ui=E.eng._ui||(E.eng._ui={});
+  if(e.key==='1'||e.key==='2'||e.key==='3'){
+    ui.bucket=['chong','wen','bao'][(+e.key)-1];ui.sel=null;render();return;
+  }
+  if(e.key==='j'||e.key==='ArrowDown'){e.preventDefault();moveSel(1);return;}
+  if(e.key==='k'||e.key==='ArrowUp'){e.preventDefault();moveSel(-1);return;}
+  if(e.key==='Enter'&&ui.sel!=null){e.preventDefault();addSel();return;}
+});
+
+// ===== 结果卡片 =====
+var BUCKET_CN={chong:'冲',wen:'稳',bao:'保'};
+function trendShort(t){
+  if(!t)return '–';
+  if(t.indexOf('更好考')>=0)return '↑易';
+  if(t.indexOf('更难考')>=0)return '↓难';
+  if(t.indexOf('波动')>=0)return '↔';
+  return '–';
+}
+// 近三年分档：把该校三年的录取位次按「同一个考生区间」各归一次档，
+// 直接回答「这学校近几年到底在哪个档」——只数次数，不给百分比。
+function zoneCell(it){
+  var zs=it.histZones||[];
+  if(!zs.length)return '<span class="zno">–</span>';
+  var cnt={};
+  zs.forEach(function(x){if(x&&x.zone)cnt[x.zone]=(cnt[x.zone]||0)+1;});
+  var uniq=0;for(var k in cnt)if(cnt.hasOwnProperty(k))uniq++;
+  var s='';
+  ['chong','wen','bao'].forEach(function(k){
+    if(cnt[k])s+='<i class="z z'+k+(uniq===1?' zmuted':'')+'">'+BUCKET_CN[k]+cnt[k]+'</i>';
+  });
+  return s||'<span class="zno">–</span>';
+}
+function zoneTip(it){
+  var zs=it.histZones||[];
+  if(!zs.length)return '近三年没有可比数据';
+  var t=zs.map(function(x){return x.year+'年'+BUCKET_CN[x.zone];}).join(' / ');
+  if(it.bigSmall)return t+'（三年里既进过冲又进过保：大小年明显，别当保底）';
+  if(it.volatile)return t+'（三年跨过档位，不是一直稳）';
+  return t+'（三年都在同一档）';
+}
+function zoneText(it){
+  var zs=it.histZones||[];
+  if(!zs.length)return '无数据';
+  return zs.map(function(x){return BUCKET_CN[x.zone];}).join('→');
+}
+function natTag(it){
+  if(!it.expensive)return '';
+  return '<i class="tagnat" title="'+(it.natureGroup==='合作办学'?
+    '合作办学，学费通常 4~9 万/年，以招生章程为准':'民办/独立学院，学费通常 1.5~3 万/年，以招生章程为准')
+    +'">'+(it.natureGroup==='合作办学'?'中外合作':'民办')+'</i>';
+}
+function remarkText(it){
+  var r=[];
+  if(it.prelim)r.push(it.prelimKind||'提前批');
+  if(it.natureGroup&&it.natureGroup!=='公办')r.push(it.natureGroup);
+  if(it.bigSmall)r.push('大小年');
+  return r.join('/');
+}
+// ===== 专业组（P6）：可报性徽标 + 展开行懒加载 =====
+function grpBadge(it){
+  if(!it.grpTotal)return '';
+  var zero=(it.grpOk===0);
+  return '<i class="tagg'+(zero?' zero':'')+'" title="专业组：可报 '+it.grpOk+' 组 / 共 '+it.grpTotal+' 组'
+    +(it.grpBlocked?('，另有 '+it.grpBlocked+' 组因选科要求报不了'):'')+'">可报 '+it.grpOk+'/'+it.grpTotal+'</i>';
+}
+function grpBox(it,eng,idx){
+  if(!it.grpTotal&&!it.grpYear)return '';
+  var e=encodeURIComponent;
+  var qs=['province='+e(eng.province||''),
+    'school_id='+e(it.schoolId||''),
+    'track='+e(eng.track||''),
+    'first='+e(eng.track||''),
+    'resel='+e((eng.subject&&eng.subject.label)||''),
+    'score_lo='+e(eng.scoreLo||''),'score_hi='+e(eng.scoreHi||''),
+    'rank_lo='+e(eng.rankLo||''),'rank_hi='+e(eng.rankHi||'')].join('&');
+  return '<div class="rg" data-grp="'+esc(qs)+'"><div class="rg-empty">正在读专业组数据…</div></div>';
+}
+function grpHtml(d,showAll){
+  if(!d||!d.ok)return '<div class="rg-empty">专业组加载失败：'+esc((d&&d.error)||'未知错误')+'</div>';
+  var gs=d.groups||[];
+  if(!gs.length)return '<div class="rg-empty">'+esc(d.error||'该校没有专业组数据')+'</div>';
+  var ok=0,gy=0;
+  gs.forEach(function(g){if(g.ok)ok++;if(g.year)gy=g.year;});
+  var h='<div class="rg-hd">专业组：<b>可报 '+ok+' 组</b> / 共 '+gs.length+' 组'
+    +(d.subject&&d.subject.full?('（按 '+esc(d.subject.full)+' 判断）'):'')
+    +'。组线取自 <b>'+gy+' 年</b>招生计划与分专业录取线，位次已换算成 <b>'+d.year+' 年等效口径</b>，'
+    +'「需考到」= 换算后的 '+d.year+' 年分数。</div>';
+  h+='<table><thead><tr><th>组</th><th>选科</th><th>需考到</th><th>差几分</th><th>学费</th><th>计划</th><th>组内专业</th></tr></thead><tbody>';
+  var limit=(showAll||gs.length<=3)?gs.length:3;
+  for(var i=0;i<limit;i++){
+    var g=gs[i];
+    var mj=(g.majors||[]).slice(0,3).map(function(m){return m.spname;}).join('、');
+    if(g.nMajor&&g.nMajor>3)mj+=' … 等 '+g.nMajor+' 个专业';
+    else if(g.majorMore)mj+=' …';
+    var bat=(g.batch&&g.batch!=='本科批')?('<span class="bat">'+esc(g.batch)+'</span>'):'';
+    h+='<tr class="rg-row'+(g.ok?'':' off')+'">'
+      +'<td>'+esc(g.name||'')+bat+'</td>'
+      +'<td class="req">'+esc(g.reqText||'')+'</td>'
+      +'<td class="n">'+(g.needScore||g.minScore||'—')+'</td>'
+      +'<td class="n">'+esc(g.gapText||'—')+'</td>'
+      +'<td class="n">'+(g.tuition?g.tuition:'—')+'</td>'
+      +'<td class="n">'+(g.planNum?g.planNum:'—')+'</td>'
+      +'<td class="maj">'+esc(mj||'—')+'</td></tr>';
+  }
+  h+='</tbody></table>';
+  if(limit<gs.length)h+='<button class="rg-more" data-rgall="1">展开全部 '+gs.length+' 组 ▼</button>';
+  if(gs.some(function(g){return !g.ok;}))h+='<div class="rg-empty">灰色行 = 你的选科报不了这个组</div>';
+  return h;
+}
+function hydrateGroups(){
+  var els=document.querySelectorAll('[data-grp]');
+  for(var i=0;i<els.length;i++){
+    (function(el){
+      if(el.getAttribute('data-loaded'))return;
+      el.setAttribute('data-loaded','1');
+      fetch('groups?'+el.getAttribute('data-grp'))
+        .then(function(r){return r.json();})
+        .then(function(d){
+          el._d=d;
+          el.innerHTML=grpHtml(d,el.getAttribute('data-all')==='1');
+        })
+        .catch(function(e){el.innerHTML='<div class="rg-empty">专业组加载失败：'+esc(e.message||e)+'</div>';});
+    })(els[i]);
+  }
+}
+function rcList(eng){
+  var ui=eng._ui||{};
+  var bucket=ui.bucket||'chong',filter=ui.filter||'all';
+  var arr=(eng[bucket]||[]).slice();
+  if(filter==='985')arr=arr.filter(function(x){return x.f985;});
+  else if(filter==='211')arr=arr.filter(function(x){return x.f211;});
+  else if(filter==='local')arr=arr.filter(function(x){return x.schoolProvince&&x.schoolProvince===eng.province;});
+  else if(filter==='noprelim')arr=arr.filter(function(x){return !x.prelim;});
+  else if(filter==='cheap')arr=arr.filter(function(x){return !x.expensive;});
+  var q=(ui.q||'').trim();
+  if(q)arr=arr.filter(function(x){
+    return (x.school+' '+(x.city||'')+' '+(x.schoolProvince||'')).indexOf(q)>=0;
+  });
+  return {bucket:bucket,filter:filter,arr:arr,q:q};
+}
+function renderEngineCard(eng,idx){
+  var s=rcList(eng);
+  var ui=eng._ui||{};
+  var exp=ui.exp||{};
+  var tabs='';
+  ['chong','wen','bao'].forEach(function(k){
+    var n=(eng.counts&&eng.counts[k])||(eng[k]||[]).length;
+    tabs+='<button data-rc="b" data-i="'+idx+'" data-k="'+k+'"'+(k===s.bucket?' class="on"':'')+'>'+BUCKET_CN[k]+' '+n+'</button>';
+  });
+  var flts='';
+  [['all','全部'],['985','只看985'],['211','只看211'],['local','只看省内'],['noprelim','不含军警'],['cheap','不含高学费']].forEach(function(f){
+    flts+='<button data-rc="f" data-i="'+idx+'" data-k="'+f[0]+'"'+(f[0]===s.filter?' class="on"':'')+'>'+f[1]+'</button>';
+  });
+  flts+='<input class="rc-search" data-rcq="'+idx+'" placeholder="搜校名 / 城市" value="'+esc(s.q||'')+'">';
+  var rm=!!eng.rangeMode;
+  var rows='';
+  if(!s.arr.length){rows='<tr><td colspan="7" class="rc-empty">'+(s.q?'没有匹配「'+esc(s.q)+'」的学校':'该筛选下没有学校')+'</td></tr>';}
+  var R=eng.rank;
+  for(var i=0;i<s.arr.length;i++){
+    var it=s.arr[i];
+    var gap=it.rank-R;
+    var tags=(it.f985?'<i class="tag985">985</i>':'')+(it.f211&&!it.f985?'<i class="tag211">211</i>':'')
+      +(it.prelim?('<i class="tagprelim">'+(it.prelimKind||'提前批')+'</i>'):'')+natTag(it)+grpBadge(it);
+    var midCol;
+    if(rm){
+      var gt=it.gapText||'';
+      var gcls=gt.indexOf('差')>=0?'neg':(gt.indexOf('富余')>=0?'pos':'');
+      midCol='<td class="n rc-need">'+(it.needScore||it.score)+'</td>'
+        +'<td class="n rc-rank">'+it.rank+'</td>'
+        +'<td class="n '+gcls+'">'+esc(gt||'—')+'</td>';
+    }else{
+      midCol='<td class="n">'+it.score+'</td>'
+        +'<td class="n rc-rank">'+it.rank+'</td>'
+        +'<td class="n '+(gap<0?'neg':(gap>0?'pos':''))+'">'+(gap>0?'+':'')+gap+'</td>';
+    }
+    var sel=(ui.sel===i)?' rc-sel':'';
+    var alt=(i%2===1)?' alt':'';
+    rows+='<tr class="rc-row'+alt+sel+'" data-exp="'+it.schoolId+'" data-exp-i="'+idx+'">'
+      +'<td class="n">'+(i+1)+'</td>'
+      +'<td><b>'+esc(it.school)+'</b>'+tags
+        +(it.city?('<div class="rc-city">'+esc(it.city)+'</div>'):'')+'</td>'
+      +midCol
+      +'<td class="rc-zone'+(it.bigSmall?' zone-bs':'')+'" title="'+esc(zoneTip(it))+'">'+zoneCell(it)+'</td>'
+      +'<td class="nw">'+addBtn(idx,it)+'</td></tr>';
+    if(exp[it.schoolId])rows+='<tr class="rc-hist"><td colspan="7">'+histHtml(it)+grpBox(it,eng,idx)+'</td></tr>';
+  }
+  var fmt=function(n){return n?Number(n).toLocaleString():'?';};
+  var hd='<div class="rc-hd">'
+    +(rm?('<b>你的区间 '+(eng.scoreLo||'?')+'–'+(eng.scoreHi||'?')+' 分</b>'
+          +'<span>位次 '+fmt(eng.rankLo)+'–'+fmt(eng.rankHi)+'</span>')
+        :('<b>你的位次 '+eng.rank+'</b>'+(eng.score?('<span>'+eng.score+' 分</span>'):'')))
+    +'<span>参考 '+eng.year+' 年 · '+esc(eng.province)+' · '+esc(eng.track||'')+'</span>'
+    +'<span class="sp"></span>'
+    +'<button class="rc-q" data-rc="query" data-i="'+idx+'">改条件</button>'
+    +((rm||eng.score)?('<button class="rc-q" data-rc="delta" data-i="'+idx+'" data-k="-10">−10 分</button>'
+                +'<button class="rc-q" data-rc="delta" data-i="'+idx+'" data-k="10">+10 分</button>'):'')
+    +'</div>';
+  var hasPrelim=(eng.chong||[]).concat(eng.wen||[],eng.bao||[]).some(function(x){return x.prelim;});
+  var hasExpensive=(eng.chong||[]).concat(eng.wen||[],eng.bao||[]).some(function(x){return x.expensive;});
+  var sp=eng.special||null;
+  var tips=[];
+  if(sp&&sp.year)tips.push('已接 '+sp.year+' 专业组');
+  if(hasPrelim)tips.push('含提前批军/警');
+  if(hasExpensive)tips.push('含中外合作/民办');
+  var tip='<div class="rc-tip">「需考到」= 该校<b>最冷门专业组</b>的门槛，<b>不等于你想报那个专业的分数</b>。'
+    +(tips.length?('<span class="tipb">'+tips.join(' · ')+'</span>'):'')
+    +'<a class="tiphelp" data-help="1">口径说明</a></div>';
+  var subj='';
+  if(eng.subject){
+    var sj=eng.subject;
+    var wcls=(sj.level==='wide')?'':' warn';
+    subj='<div class="rc-subj'+wcls+'">选科 '+esc(sj.full||'')+'（'+esc(sj.label||'')+'）· 可报专业面 <b>'+esc(sj.coverage||'')+'</b> · '+esc(sj.level_cn||'')
+      +(sj.warning?('<br>⚠ '+esc(sj.warning)):'')
+      +'<br><span class="mini">'+esc(sj.note||'')+'</span></div>';
+  }
+  var allN=(eng[s.bucket]||[]).length;
+  var realN=(eng.counts&&eng.counts[s.bucket])||allN;
+  var foot=(rm?'「差 N 分」＝还要再高 N 分；「富余 N 分」＝你区间下限已经够了。'
+               :'位次差 = 该校最低位次 − 你的位次；负＝更难，正＝更稳。')
+    +'「近三年」是<b>三年分档次数</b>（<i class="z zwen">稳2</i><i class="z zchong">冲1</i>），不是概率；虚线框＝大小年。'
+    +'点行展开三年数据'+(sp&&sp.year?'与专业组':'')+'。';
+  if(s.filter==='all'&&realN>allN){foot='本档共 '+realN+' 所，表格仅显示前 '+allN+' 所。'+foot;}
+  var th=rm
+    ? '<th>#</th><th>院校 / 城市</th><th>需考到</th><th>位次</th><th>差几分</th><th>近三年</th><th>加入</th>'
+    : '<th>#</th><th>院校 / 城市</th><th>全校最低分</th><th>位次</th><th>位次差</th><th>近三年</th><th>加入</th>';
+  return '<div class="rc">'+hd+subj+tip
+    +'<div class="rc-tabs">'+tabs+'</div>'
+    +'<div class="rc-flt">'+flts+'<span class="sp"></span>'
+    +'<button data-rc="fill" data-i="'+idx+'">按 20/50/30 排满</button>'
+    +'<button data-rc="bulk" data-i="'+idx+'">批量加入前 10</button>'
+    +'<button data-rc="copy" data-i="'+idx+'">复制表格</button></div>'
+    +'<div class="rc-tw"><table><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'<div class="rc-ft">'+foot+'</div></div>';
+}
+function copyTable(eng){
+  var s=rcList(eng);
+  var rm=!!eng.rangeMode;
+  var t=rm?('序号\t院校\t城市\t需考到\t位次\t差几分\t近三年\t备注\n'):('序号\t院校\t城市\t最低分\t位次\t位次差\t近三年\t备注\n');
+  for(var i=0;i<s.arr.length;i++){
+    var it=s.arr[i];
+    t+=(i+1)+'\t'+it.school+'\t'+(it.city||'')+'\t'
+      +(rm?(it.needScore||it.score)+'\t'+it.rank+'\t'+(it.gapText||''):it.score+'\t'+it.rank+'\t'+(it.rank-eng.rank))
+      +'\t'+zoneText(it)+'\t'+remarkText(it)+'\n';
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(function(){
+      toast('已复制 '+s.arr.length+' 行，可直接粘到 Excel');
+    },function(){toast('复制失败，请手动选择表格');});
+  }else{toast('当前浏览器不支持一键复制');}
+}
+function onMsgAreaClick(e){
+  var t=e.target;
+  if(!t)return;
+  if(t.id==='intakeGo'){submitIntake();return;}
+  if(t.id==='queryGo'){submitQuery();return;}
+  if(t.id==='queryClose'){closeQuery();return;}
+
+  // 点行 -> 展开三年数据（排除按钮）
+  var ex=t.closest?t.closest('[data-exp]'):null;
+  if(ex&&!t.closest('[data-add]')&&!t.closest('[data-rc]')){
+    var mi=parseInt(ex.getAttribute('data-exp-i'),10);
+    var sid=parseInt(ex.getAttribute('data-exp'),10);
+    var ms=chats[curId]&&chats[curId].msgs;
+    var msg=ms&&ms[mi];
+    if(msg&&msg.engine){
+      msg.engine._ui=msg.engine._ui||{};
+      var exmap=msg.engine._ui.exp=msg.engine._ui.exp||{};
+      exmap[sid]=!exmap[sid];
+      render();save();
+    }
+    return;
+  }
+
+  // 加入志愿表
+  var ad=t.closest?t.closest('[data-add]'):null;
+  if(ad){
+    var pr=ad.getAttribute('data-add').split(':');
+    var mi2=parseInt(pr[0],10),sid2=parseInt(pr[1],10);
+    addToDraft(mi2,isNaN(sid2)?pr[1]:sid2);
+    return;
+  }
+
+  var el=t.closest?t.closest('[data-rc]'):null;
+  if(!el)return;
+  var idx=parseInt(el.getAttribute('data-i'),10);
+  var ms2=chats[curId]&&chats[curId].msgs;
+  if(!ms2||!ms2[idx])return;
+  var eng=ms2[idx].engine;
+  if(!eng)return;
+  var act=el.getAttribute('data-rc'),k=el.getAttribute('data-k');
+  if(act==='copy'){copyTable(eng);return;}
+  if(act==='query'){openQuery();return;}
+  if(act==='delta'){rerunDelta(eng,parseInt(k,10));return;}
+  if(act==='bulk'){
+    var n=addManyToDraft(idx,rcList(eng).arr.slice(0,10));
+    toast(n?('已加入 '+n+' 所'):'这 10 所都已经在志愿表里了');
+    return;
+  }
+  if(act==='fill'){fillDraft(idx);return;}
+  eng._ui=eng._ui||{};
+  if(act==='b')eng._ui.bucket=k;
+  else if(act==='f')eng._ui.filter=k;
+  render();save();
+}
+
+// ===== 志愿草稿篮 =====
+var DRAFT_MAX_BY_PROV={湖南:45,广东:45,江苏:40,浙江:80,山东:96,河北:96,重庆:96,辽宁:112,北京:30,天津:50,上海:24,海南:24,河南:48,四川:45,陕西:45,山西:45,云南:40,贵州:45,内蒙古:45,安徽:45,江西:45,湖北:45,福建:40,黑龙江:40,吉林:40,广西:40,甘肃:45,新疆:45,宁夏:45,青海:45,西藏:45};
+function draftCap(){
+  var c=chats[curId];
+  var p=(c&&c.draftMeta&&c.draftMeta.province)||'';
+  return DRAFT_MAX_BY_PROV[p]||45;
+}
+function getDraft(){
+  var c=chats[curId];
+  if(!c)return [];
+  if(!c.draft)c.draft=[];
+  return c.draft;
+}
+function baseRank(){
+  var c=chats[curId];
+  return (c&&c.draftMeta&&c.draftMeta.rank)||0;
+}
+function inDraft(sid){
+  var d=getDraft();
+  for(var i=0;i<d.length;i++){if(d[i].schoolId===sid)return true;}
+  return false;
+}
+function findItemById(eng,sid){
+  var keys=['chong','wen','bao'];
+  for(var k=0;k<keys.length;k++){
+    var arr=eng[keys[k]]||[];
+    for(var i=0;i<arr.length;i++){if(arr[i].schoolId===sid)return {item:arr[i],bucket:keys[k]};}
+  }
+  return null;
+}
+function addBtn(idx,it){
+  var on=inDraft(it.schoolId);
+  return '<button class="rc-add'+(on?' on':'')+'" title="加入志愿表" data-add="'+idx+':'+it.schoolId+'">'+(on?'✓':'+')+'</button>';
+}
+function addToDraft(msgIdx,sid){
+  var ms=chats[curId]&&chats[curId].msgs;
+  var msg=ms&&ms[msgIdx];
+  if(!msg||!msg.engine){toast('这条消息没有可加入的数据');return;}
+  if(inDraft(sid)){toast('已经在志愿表里了');return;}
+  var f=findItemById(msg.engine,sid);
+  if(!f){toast('没找到这所学校');return;}
+  var c=chats[curId];
+  c.draftMeta={province:msg.engine.province,track:msg.engine.track,year:msg.engine.year,
+               rank:msg.engine.rank,score:msg.engine.score,
+               scoreLo:msg.engine.scoreLo||0,scoreHi:msg.engine.scoreHi||0,
+               rangeMode:!!msg.engine.rangeMode};
+  var d=getDraft();
+  if(d.length>=draftCap()){toast('已达志愿上限 '+draftCap()+' 个');return;}
+  d.push({
+    schoolId:sid,bucket:f.bucket,
+    school:f.item.school,city:f.item.city||'',
+    score:f.item.score,rank:f.item.rank,year:f.item.year,
+    needScore:f.item.needScore||f.item.score,
+    gapText:f.item.gapText||'',zoneText:f.item.zoneText||'',
+    minTuition:(f.item.minTuition!=null?f.item.minTuition:null),
+    grpOk:f.item.grpOk||0,grpTotal:f.item.grpTotal||0,
+    rangeMode:!!msg.engine.rangeMode,
+    gap:f.item.rank-msg.engine.rank,trend:f.item.trend||'',
+    schoolProvince:f.item.schoolProvince||''
+  });
+  save();render();
+  toast('已加入志愿表（'+d.length+'/'+draftCap()+'）');
+}
+function removeFromDraft(sid){
+  var d=getDraft();
+  for(var i=0;i<d.length;i++){
+    if(d[i].schoolId===sid){
+      var it=d[i];
+      _lastRemoved={item:it,index:i};
+      d.splice(i,1);
+      showUndo('已移除「'+it.school+'」');
+      break;
+    }
+  }
+  save();render();
+}
+var _lastRemoved=null,_undoTimer=null;
+function showUndo(txt){
+  var b=S('undoBar');if(!b)return;
+  var t=S('undoTxt');if(t)t.textContent=txt;
+  b.classList.add('show');
+  clearTimeout(_undoTimer);
+  _undoTimer=setTimeout(hideUndo,8000);
+}
+function hideUndo(){
+  var b=S('undoBar');if(b)b.classList.remove('show');
+  _lastRemoved=null;
+  clearTimeout(_undoTimer);
+}
+function doUndo(){
+  if(!_lastRemoved)return;
+  var d=getDraft();
+  var idx=Math.max(0,Math.min(_lastRemoved.index,d.length));
+  d.splice(idx,0,_lastRemoved.item);
+  var nm=_lastRemoved.item.school;
+  hideUndo();save();render();
+  toast('已恢复「'+nm+'」');
+}
+function fillDraft(msgIdx){
+  var ms=chats[curId]&&chats[curId].msgs;
+  var msg=ms&&ms[msgIdx];
+  if(!msg||!msg.engine){toast('这条消息没有可加入的数据');return;}
+  var eng=msg.engine,cap=draftCap(),list=[];
+  [['chong',0.2],['wen',0.5],['bao',0.3]].forEach(function(p){
+    var want=Math.max(1,Math.round(cap*p[1]));
+    var arr=(eng[p[0]]||[]),picked=0;
+    for(var i=0;i<arr.length&&picked<want;i++){
+      if(inDraft(arr[i].schoolId))continue;
+      list.push(arr[i]);picked++;
+    }
+  });
+  var n=addManyToDraft(msgIdx,list);
+  toast(n?('已按 冲20% / 稳50% / 保30% 加入 '+n+' 所'):'这些学校都已经在志愿表里了');
+}
+function moveDraft(sid,dir){
+  var d=getDraft();
+  for(var i=0;i<d.length;i++){
+    if(d[i].schoolId===sid){
+      var j=i+dir;
+      if(j<0||j>=d.length)return;
+      var tmp=d[i];d[i]=d[j];d[j]=tmp;
+      save();render();
+      return;
+    }
+  }
+}
+function draftStats(){
+  var d=getDraft(),s={n:d.length,chong:0,wen:0,bao:0};
+  for(var i=0;i<d.length;i++){
+    if(d[i].bucket==='chong')s.chong++;
+    else if(d[i].bucket==='wen')s.wen++;
+    else if(d[i].bucket==='bao')s.bao++;
+  }
+  return s;
+}
+function renderDraftBar(){
+  var bar=S('draftBar');
+  if(!bar)return;
+  var hasMsgs=curId&&chats[curId]&&chats[curId].msgs&&chats[curId].msgs.length;
+  var s=draftStats();
+  if(!hasMsgs||!s.n){bar.style.display='none';bar.innerHTML='';return;}
+  var cap=draftCap(),warn='';
+  if(s.bao<3)warn='<span class="db-warn">保底不足 3 所</span>';
+  else if(s.n<Math.floor(cap*0.8))warn='<span class="db-tip">还差 '+(cap-s.n)+' 个</span>';
+  bar.style.display='flex';
+  bar.innerHTML='<span class="db-main">志愿表 <b>'+s.n+'</b>/'+cap
+    +' · 冲 '+s.chong+' 稳 '+s.wen+' 保 '+s.bao+'</span>'+warn
+    +'<span class="sp"></span>'
+    +'<button data-db="open">查看 / 排序</button>'
+    +'<button class="db-go" data-db="export">导出 Excel</button>';
+}
+function openHelp(){var ov=S('helpOverlay');if(ov)ov.style.display='flex';}
+function openDraft(){
+  var ov=S('draftOverlay');if(!ov)return;
+  renderDraftTable();
+  ov.style.display='flex';
+}
+function closeDraft(){
+  var ov=S('draftOverlay');if(ov)ov.style.display='none';
+}
+function renderDraftTable(){
+  var tbody=S('draftBody'),warnEl=S('draftWarn'),cntEl=S('draftCount');
+  if(!tbody)return;
+  var d=getDraft(),cap=draftCap(),s=draftStats(),base=baseRank();
+  if(cntEl)cntEl.textContent=s.n+' / '+cap;
+  var msgs=[];
+  if(s.bao<3)msgs.push('保底建议至少 3 所，现在只有 '+s.bao+' 所，滑档风险偏高。');
+  if(s.n<cap)msgs.push('还有 '+(cap-s.n)+' 个空位。参考比例：冲 20% / 稳 50% / 保 30%。');
+  if(warnEl){
+    var tot=s.n||1;
+    var bar='<div class="dw-bar" title="冲 '+s.chong+' / 稳 '+s.wen+' / 保 '+s.bao+'">'
+      +(s.chong?'<i class="bc bc-chong" style="width:'+(s.chong*100/tot).toFixed(1)+'%"></i>':'')
+      +(s.wen?'<i class="bc bc-wen" style="width:'+(s.wen*100/tot).toFixed(1)+'%"></i>':'')
+      +(s.bao?'<i class="bc bc-bao" style="width:'+(s.bao*100/tot).toFixed(1)+'%"></i>':'')
+      +'</div>';
+    warnEl.innerHTML=bar+(msgs.length?('<div class="dw-i">'+msgs.join('<br>')+'</div>'):'<div class="dw-ok">比例看起来可以。</div>');
+  }
+  if(!d.length){
+    tbody.innerHTML='<tr><td colspan="10" class="rc-empty">还没有加入任何学校。在上方结果表格里点行尾的「+」。</td></tr>';
+    return;
+  }
+  var h='';
+  for(var i=0;i<d.length;i++){
+    var it=d[i];
+    var need=it.needScore||it.score;
+    var gt=it.gapText||'—';
+    var gcls=(gt.indexOf('差')>=0)?'neg':((gt.indexOf('富余')>=0)?'pos':'');
+    var fee=(it.minTuition!=null)?('¥'+it.minTuition):'—';
+    var grp=it.grpTotal?('可报 '+it.grpOk+'/'+it.grpTotal):'—';
+    h+='<tr>'
+      +'<td class="n">'+(i+1)+'</td>'
+      +'<td><span class="bd bd-'+it.bucket+'">'+BUCKET_CN[it.bucket]+'</span></td>'
+      +'<td><b>'+esc(it.school)+'</b>'+(it.city?('<div class="dcity">'+esc(it.city)+'</div>'):'')+'</td>'
+      +'<td class="n">'+(need||'—')+'</td>'
+      +'<td class="n">'+(it.rank||'—')+'</td>'
+      +'<td class="n '+gcls+'">'+esc(gt)+'</td>'
+      +'<td>'+(it.zoneText?esc(it.zoneText):'—')+'</td>'
+      +'<td class="n">'+fee+'</td>'
+      +'<td class="n">'+grp+'</td>'
+      +'<td class="nw">'
+      +'<button data-db="up" data-sid="'+it.schoolId+'">▲</button>'
+      +'<button data-db="down" data-sid="'+it.schoolId+'">▼</button>'
+      +'<button data-db="del" data-sid="'+it.schoolId+'">删除</button>'
+      +'</td></tr>';
+  }
+  tbody.innerHTML=h;
+}
+function exportDraft(){
+  var d=getDraft();
+  if(!d.length){toast('志愿表是空的');return;}
+  var c=chats[curId],meta=c.draftMeta||{},base=meta.rank||0;
+  var items=d.map(function(it){
+    return {bucket:it.bucket,school:it.school,city:it.city,score:it.score,rank:it.rank,
+            needScore:it.needScore||it.score,gapText:it.gapText||'',
+            zoneText:it.zoneText||'',tuition:(it.minTuition!=null?it.minTuition:null),
+            grpOk:it.grpOk||0,grpTotal:it.grpTotal||0,rangeMode:!!it.rangeMode,
+            gap:base?(it.rank-base):it.gap,trend:it.trend};
+  });
+  var payload={
+    title:(c.name||'志愿表'),province:meta.province||'',track:meta.track||'',
+    year:meta.year||'',rank:meta.rank||0,score:meta.score||0,
+    scoreLo:meta.scoreLo||0,scoreHi:meta.scoreHi||0,rangeMode:!!meta.rangeMode,
+    max:draftCap(),items:items
+  };
+  toast('正在生成 Excel…');
+  fetch('export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();})
+    .then(function(blob){
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url;
+      a.download=String(payload.title).replace(/[\\/:*?"<>|]/g,'_')+' 志愿表.xlsx';
+      document.body.appendChild(a);a.click();
+      setTimeout(function(){URL.revokeObjectURL(url);if(a.parentNode)a.parentNode.removeChild(a);},1500);
+      toast('已导出 '+items.length+' 行');
+    })
+    .catch(function(e){
+      toast('导出失败（'+e.message+'），改为下载 CSV');
+      exportCsvFallback(payload);
+    });
+}
+function exportCsvFallback(p){
+  var t='序号,档位,院校,城市,需考到,位次,差几分,近三年,学费,可报组\n';
+  for(var i=0;i<p.items.length;i++){
+    var it=p.items[i];
+    t+=(i+1)+','+BUCKET_CN[it.bucket]+',"'+it.school+'","'+(it.city||'')+'",'
+      +(it.needScore||it.score)+','+(it.rank||'')+',"'+(it.gapText||'')+'","'+(it.zoneText||'')+'",'
+      +(it.tuition!=null?it.tuition:'')+','+(it.grpTotal?(it.grpOk+'/'+it.grpTotal):'')+'\n';
+  }
+  var blob=new Blob(['\ufeff'+t],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download=p.title+' 志愿表.csv';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);if(a.parentNode)a.parentNode.removeChild(a);},1500);
+}
+function onDraftClick(e){
+  var el=(e.target&&e.target.closest)?e.target.closest('[data-db]'):null;
+  if(!el)return;
+  var act=el.getAttribute('data-db'),sid=el.getAttribute('data-sid');
+  if(act==='open'){openDraft();return;}
+  if(act==='export'){exportDraft();return;}
+  if(act==='close'){closeDraft();return;}
+  if(act==='clear'){
+    if(!getDraft().length){toast('志愿表已经是空的');return;}
+    if(confirm('清空志愿表？所有已加入的学校都会移除。')){
+      chats[curId].draft=[];save();render();renderDraftTable();
+    }
+    return;
+  }
+  var sidNum=isNaN(parseInt(sid,10))?sid:parseInt(sid,10);
+  if(act==='up'){moveDraft(sidNum,-1);renderDraftTable();return;}
+  if(act==='down'){moveDraft(sidNum,1);renderDraftTable();return;}
+  if(act==='del'){removeFromDraft(sidNum);renderDraftTable();return;}
+}
+
+// ===== Markdown 渲染缓存（避免每次重绘都重新解析历史消息） =====
+var _mdCache={},_mdOrder=[];
+function mdCached(s){
+  s=String(s==null?'':s);
+  var k=s.length+':'+(s.charCodeAt(0)||0)+':'+(s.charCodeAt(s.length>>1)||0);
+  var e=_mdCache[k];
+  if(e&&e.s===s)return e.h;
+  var h=md(s);
+  _mdCache[k]={s:s,h:h};_mdOrder.push(k);
+  while(_mdOrder.length>400){delete _mdCache[_mdOrder.shift()];}
+  return h;
+}
+
+// ===== 三年位次展开 =====
+function histHtml(it){
+  var h=it.history||[];
+  if(!h.length)return '<div class="rh">暂无 2024~2026 历史数据</div>';
+  var zm={};
+  (it.histZones||[]).forEach(function(x){if(x&&x.zone)zm[x.year]=x.zone;});
+  var s='';
+  for(var i=0;i<h.length;i++){
+    var z=zm[h[i].year];
+    s+='<span class="rh-i"><b>'+h[i].year+'</b> '+h[i].score+' 分 · 位次 '+h[i].rank
+      +(z?(' · <i class="z z'+z+'">'+BUCKET_CN[z]+'</i>'):'')+'</span>';
+  }
+  var extra='';
+  if(it.history&&it.history.length){
+    var first=it.history[0],last=it.history[it.history.length-1];
+    var d=last.rank-first.rank;
+    extra='<span class="rh-tip">位次'+first.year+'→'+last.year+' '
+      +(d>0?('后移 '+d+' 名（更好考）'):(d<0?('前移 '+(-d)+' 名（更难考）'):'持平'))+'</span>';
+  }
+  return '<div class="rh">'+s+extra+'<span class="rh-tip">（点行可收起）</span></div>';
+}
+
+// ===== 批量加入草稿 =====
+function addManyToDraft(msgIdx,items){
+  var ms=chats[curId]&&chats[curId].msgs;
+  var msg=ms&&ms[msgIdx];
+  if(!msg||!msg.engine||!items||!items.length)return 0;
+  var c=chats[curId];
+  c.draftMeta={province:msg.engine.province,track:msg.engine.track,year:msg.engine.year,
+               rank:msg.engine.rank,score:msg.engine.score,
+               scoreLo:msg.engine.scoreLo||0,scoreHi:msg.engine.scoreHi||0,
+               rangeMode:!!msg.engine.rangeMode};
+  var d=getDraft(),n=0;
+  for(var i=0;i<items.length;i++){
+    if(d.length>=draftCap())break;
+    var sid=items[i].schoolId;
+    if(inDraft(sid))continue;
+    var f=findItemById(msg.engine,sid);
+    if(!f)continue;
+    d.push({schoolId:sid,bucket:f.bucket,school:f.item.school,city:f.item.city||'',
+            score:f.item.score,rank:f.item.rank,year:f.item.year,
+            needScore:f.item.needScore||f.item.score,
+            gapText:f.item.gapText||'',zoneText:f.item.zoneText||'',
+            minTuition:(f.item.minTuition!=null?f.item.minTuition:null),
+            grpOk:f.item.grpOk||0,grpTotal:f.item.grpTotal||0,
+            rangeMode:!!msg.engine.rangeMode,
+            gap:f.item.rank-msg.engine.rank,trend:f.item.trend||'',
+            schoolProvince:f.item.schoolProvince||''});
+    n++;
+  }
+  if(n){save();render();}
+  return n;
+}
+
+// ===== 快捷重算：整个区间 ±N 分 =====
+function rerunDelta(eng,d){
+  var c=chats[curId];if(!c)return;
+  var q=c.lastQuery||{};
+  var f=(eng.track==='历史类'?'history':'physics');
+  var nq={province:eng.province,first:f,resel:q.resel||[],
+          care:q.care||[],avoid:q.avoid||[],cities:q.cities||[],adj:q.adj||'',
+          scoreLo:'',scoreHi:'',rankLo:'',rankHi:''};
+  if(eng.rangeMode&&eng.scoreLo&&eng.scoreHi){
+    var lo=eng.scoreLo+d,hi=eng.scoreHi+d;
+    if(lo<100||hi>750){toast('分数超出合理范围');return;}
+    nq.scoreLo=String(lo);nq.scoreHi=String(hi);
+  }else{
+    var nr=(eng.score||0)+d;
+    if(nr<100||nr>750){toast('分数超出合理范围');return;}
+    nq.scoreLo=String(Math.max(0,nr-10));nq.scoreHi=String(nr+10);
+  }
+  c.lastQuery=nq;pendingIntake=nq;
+  var inp=S('inp');if(inp)inp.value=intakeToText(nq);
+  send();
+}
+
+// ===== 条件表单（首屏 + 改条件弹窗共用） =====
+function intakeFieldsHtml(p){
+  p=p||{};
+  var prov=p.province||'湖南';
+  // 只给真正有数据的省份，避免用户选了河南后一路空白
+  var PROV_OK=['湖南','广东'];
+  if(PROV_OK.indexOf(prov)<0)prov='湖南';
+  var po='';
+  for(var i=0;i<PROV_OK.length;i++){
+    po+='<option value="'+PROV_OK[i]+'"'+(PROV_OK[i]===prov?' selected':'')+'>'+PROV_OK[i]+'</option>';
+  }
+  po+='<option disabled>──── 更多省份正在补数据（河南/山东/河北/江苏…）────</option>';
+  var first=p.first||((p.track==='history'||p.track==='历史类')?'history':'physics');
+  var resel=p.resel||[];
+  var lo=p.scoreLo||'',hi=p.scoreHi||'';
+  if(!lo&&!hi&&p.score){lo=Math.max(0,(+p.score||0)-10);hi=(+p.score||0)+10;}
+  var rlo=p.rankLo||'',rhi=p.rankHi||'';
+  if(!rlo&&!rhi&&p.rank){rlo=p.rank;rhi='';}
+  var care=p.care||[],avoid=p.avoid||[],cities=p.cities||[];
+  if(!care.length&&p.want){/* 旧版没有偏好项，留空 */}
+  if(!avoid.length&&p.avoid&&typeof p.avoid==='string'){avoid=[p.avoid];}
+  if(!cities.length&&p.city&&typeof p.city==='string'&&p.city!=='不限'){cities=[p.city];}
+  var adj=p.adj||'';
+  return ''
+   +'<div class="row">'
+   +'<div class="fld"><label>省份</label><select data-f="prov">'+po+'</select></div>'
+   +'<div class="fld"><label>首选科目</label><div class="seg" data-group="first">'
+   +chipHtml('first',[['physics','物理'],['history','历史']],[first])
+   +'</div></div></div>'
+   +'<div class="row"><div class="fld"><label>再选科目 <span class="mini">（选 2 门；还没定也能先看）</span></label>'
+   +'<div class="chips" data-group="resel">'+chipHtml('resel',RESEL_LIST,resel)+'</div>'
+   +'<div class="combo" data-combo="1"></div></div></div>'
+   +'<div class="row"><div class="fld"><label>预估分数 <span class="mini">（模考大概多少，给个区间）</span></label>'
+   +'<div class="range"><input type="number" data-f="scoreLo" placeholder="585" value="'+esc(String(lo||''))+'">'
+   +'<span class="sep">～</span><input type="number" data-f="scoreHi" placeholder="605" value="'+esc(String(hi||''))+'">'
+   +'<span class="unit">分</span></div></div></div>'
+   +'<div class="row"><div class="fld"><label>换算位次 <span class="mini">（按参考年一分一段自动算）</span></label>'
+   +'<div class="rankline"><span class="rhint" data-rankhint="1">填分数后自动换算</span>'
+   +'<button type="button" class="lnk" data-rankedit="1">手改</button></div>'
+   +'<div class="range" data-rankbox="1" style="display:none">'
+   +'<input type="number" data-f="rankLo" placeholder="自动" value="'+esc(String(rlo||''))+'">'
+   +'<span class="sep">～</span><input type="number" data-f="rankHi" placeholder="自动" value="'+esc(String(rhi||''))+'">'
+   +'<span class="unit">位</span></div></div></div>'
+   +'<div class="row"><div class="fld"><label>更在乎什么 <span class="mini">（选 1-2 项，决定方向排序）</span></label>'
+   +'<div class="chips" data-group="care">'+chipHtml('care',CARE_LIST,care)+'</div></div></div>'
+   +'<div class="more" data-more="1">▼ 更多条件（不接受的方向 / 城市 / 调剂）</div>'
+   +'<div class="adv" style="display:none">'
+   +'<div class="row"><div class="fld"><label>不接受的方向 <span class="mini">（可空）</span></label>'
+   +'<div class="chips" data-group="avoid">'+chipHtml('avoid',AVOID_LIST,avoid)+'</div></div></div>'
+   +'<div class="row"><div class="fld"><label>城市 <span class="mini">（可空，可多选）</span></label>'
+   +'<div class="chips" data-group="cities">'+chipHtml('cities',CITY_LIST,cities)+'</div></div>'
+   +'<div class="fld"><label>专业组调剂</label><select data-f="adj">'
+   +'<option value=""'+(adj===''?' selected':'')+'>不限</option>'
+   +'<option value="接受"'+(adj==='接受'?' selected':'')+'>接受调剂</option>'
+   +'<option value="不接受"'+(adj==='不接受'?' selected':'')+'>不接受调剂</option>'
+   +'</select></div></div>'
+   +'</div>';
+}
+function collectIntake(root){
+  root=root||document.querySelector('.intake');
+  if(!root||!root.querySelector)return {};
+  var psel=root.querySelector('select[data-f="prov"]');
+  return {
+    province: psel?psel.value:'湖南',
+    first: selOf(root,'first')[0]||'physics',
+    resel: selOf(root,'resel').slice(0,2),
+    scoreLo: valOf(root,'scoreLo'), scoreHi: valOf(root,'scoreHi'),
+    rankLo: valOf(root,'rankLo'), rankHi: valOf(root,'rankHi'),
+    care: selOf(root,'care'), avoid: selOf(root,'avoid'), cities: selOf(root,'cities'),
+    adj: valOf(root,'adj')
+  };
+}
+function intakeToText(q){
+  if(!q)return '';
+  var f=(q.first==='history')?'history':'physics';
+  var p=[q.province||''];
+  p.push(f==='history'?'历史类':'物理类');
+  var lbl=comboLabel(f,q.resel||[]);
+  if(lbl.length>1)p.push(lbl);
+  if(q.scoreLo&&q.scoreHi)p.push(q.scoreLo+'-'+q.scoreHi+'分');
+  else if(q.scoreLo)p.push(q.scoreLo+'分');
+  if(q.rankLo&&q.rankHi)p.push('位次'+q.rankLo+'-'+q.rankHi);
+  else if(q.rankLo)p.push('位次'+q.rankLo);
+  if(q.care&&q.care.length)p.push('更看重'+q.care.map(function(c){return CARE_CN[c]||c;}).join('/'));
+  if(q.avoid&&q.avoid.length)p.push('不学'+q.avoid.join('/'));
+  var cs=(q.cities||[]).filter(function(c){return c!=='不限'&&c!=='省内';});
+  if((q.cities||[]).indexOf('省内')>=0)p.push('优先省内');
+  if(cs.length)p.push('城市'+cs.join('/'));
+  if(q.adj)p.push(q.adj+'调剂');
+  return p.filter(function(x){return x;}).join(' ');
+}
+function openQuery(){
+  var ov=S('queryOverlay');if(!ov)return;
+  var c=chats[curId]||{};
+  var p=c.lastQuery||{};
+  var box=S('queryFields');
+  if(box){
+    box.innerHTML=intakeFieldsHtml(p);
+    box.removeAttribute('data-rankmanual');
+    updateIntakeDerived(box);
+  }
+  var e=S('queryErr');if(e)e.textContent='';
+  ov.style.display='flex';
+}
+function closeQuery(){
+  var ov=S('queryOverlay');if(ov)ov.style.display='none';
+}
+function submitQuery(){
+  var box=S('queryFields');
+  var q=collectIntake(box),err=S('queryErr');
+  var hasScore=q.scoreLo&&q.scoreHi,hasRank=q.rankLo&&q.rankHi;
+  if(!hasScore&&!hasRank){if(err)err.textContent='分数区间或位次区间，至少给一个';return;}
+  if(err)err.textContent='';
+  if(curId&&chats[curId])chats[curId].lastQuery=q;
+  closeQuery();pendingIntake=q;
+  var inp=S('inp');if(inp)inp.value=intakeToText(q);
+  send();
+}
+
+// ===== 流式输出（OpenAI 兼容 SSE；失败自动回落非流式） =====
+async function streamChat(apiUrl,apiKey,body,sig,onDelta){
+  body.stream=true;
+  var r=await fetch(apiUrl,{method:'POST',signal:sig,
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+    body:JSON.stringify(body)});
+  if(!r.ok){
+    var e=await r.json().catch(function(){return{};});
+    throw new Error('LLM API '+((e.error&&e.error.message)||('HTTP '+r.status))+' → '+apiUrl);
+  }
+  if(!r.body||!r.body.getReader){
+    var d=await r.json();
+    var full=(d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||'';
+    onDelta(full);
+    return full;
+  }
+  var reader=r.body.getReader(),dec=new TextDecoder(),buf='',acc='';
+  while(true){
+    var step=await reader.read();
+    if(step.done)break;
+    buf+=dec.decode(step.value,{stream:true});
+    var lines=buf.split('\n');
+    buf=lines.pop();
+    for(var i=0;i<lines.length;i++){
+      var line=lines[i];
+      if(line.indexOf('data:')!==0)continue;
+      var payload=line.slice(5).trim();
+      if(!payload||payload==='[DONE]')continue;
+      try{
+        var j=JSON.parse(payload);
+        var ch=j.choices&&j.choices[0];
+        var dl=ch&&ch.delta&&ch.delta.content;
+        if(dl){acc+=dl;onDelta(acc);}
+      }catch(_e){}
+    }
+  }
+  if(!acc){acc='';}
+  return acc;
+}
+
+// ===== 渲染 =====
+function render(){
+  try{
+    var h='';
+    Object.keys(chats).forEach(function(id){
+      var c=chats[id];
+      if(!c||c.mode!==mode)return;
+      var last=(c.msgs&&c.msgs.length)?c.msgs[c.msgs.length-1].content:'';
+      var label=(c.name&&c.name!=='新对话')?c.name:(plainText(last).slice(0,18)||'新对话');
+      var on=id===curId?' on':'';
+      h+='<div class="item'+on+'" data-id="'+esc(id)+'">'+esc(plainText(label))
+        +'<span style="float:right;opacity:0.4;cursor:pointer" data-del="'+esc(id)+'">x</span></div>';
+    });
+    var cl=S('chatList');if(cl)cl.innerHTML=h;
+
+    var m=S('msgArea');if(!m)return;
+    if(!curId||!chats[curId]||!chats[curId].msgs||!chats[curId].msgs.length){
+      m.innerHTML=renderIntake();
+      updateIntakeDerived(m.querySelector('.intake'));
+      renderDraftBar();
+      return;
+    }
+    var hh='';
+    var ms=chats[curId].msgs;
+    for(var i=0;i<ms.length;i++){
+      var x=ms[i];if(!x)continue;
+      var isUser=x.role==='user';
+      var who=isUser?'你':(chats[curId].mode==='fun'?'张雪峰':'顾问');
+      var cls=isUser?'u':'a md'+(x.engine?' wide':'');
+      var body=isUser?esc(x.content||''):mdCached(x.content||'');
+      hh+='<div class="bubble '+cls+'"><div class="who">'+who+'</div>'+body;
+      if(x.engine)hh+=renderEngineCard(x.engine,i);
+      if(x.raw)hh+='<details class="basis"><summary>📊 数据依据（本次查询的原始结果）</summary><pre>'+esc(x.raw)+'</pre></details>';
+      hh+='</div>';
+    }
+    m.innerHTML=hh;
+    renderDraftBar();
+    hydrateGroups();
+    m.scrollTop=m.scrollHeight;
+  }catch(e){console.warn('render error:',e.message);}
+}
+
+// ===== 输出可审计：点名回复里「未出现在数据库结果中」的分数/位次 =====
+var AUDIT_STRUCTURAL={2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,12:1,15:1,20:1,24:1,30:1,40:1,45:1,48:1,50:1,60:1,70:1,80:1,96:1,100:1,112:1,150:1,200:1,211:1,750:1,985:1};
+function auditScan(reply,evidenceText,candRank){
+  var allowed={};
+  (evidenceText||'').replace(/(\d{2,6})/g,function(m,d,off){
+    var p=(evidenceText||'')[off-1], n=(evidenceText||'')[off+m.length];
+    if(!(/\d/.test(p||'')||/\./.test(p||'')||/\d/.test(n||'')||/\./.test(n||'')))allowed[+m]=1;
+    return m;
+  });
+  var sus=[],seen={};
+  (reply||'').replace(/(\d{2,6})/g,function(m,d,off){
+    var n=+m;
+    var prev=reply[off-1]||'',next=reply[off+m.length]||'';
+    if(/\d/.test(prev)||/\./.test(prev)||/\d/.test(next)||/\./.test(next))return m;
+    if(seen[n]||AUDIT_STRUCTURAL[n]||allowed[n])return m;
+    if(n>=2020&&n<=2035)return m;
+    var kind=null;
+    if(n>=200&&n<=750&&n%10!==0)kind='score';
+    else if(n>=1000&&n<=600000&&n%100!==0)kind='rank';
+    else if(n>=1000&&n<=600000&&candRank&&n>=candRank*0.5&&n<=candRank*2)kind='rank';
+    if(!kind)return m;
+    seen[n]=1;
+    sus.push({v:n,kind:kind,ctx:(reply.slice(Math.max(0,off-16),off+16)||'').replace(/\n/g,' ')});
+    return m;
+  });
+  return sus;
+}
+function auditWarning(sus){
+  var t='\n\n---\n⚠️【数据校验】以下数字没有出现在本次数据库查询结果里，可能是模型自行推断，请以省考试院官方投档线为准，不要直接采信：\n';
+  sus.slice(0,10).forEach(function(s){t+='- '+s.v+'（疑似'+(s.kind==='score'?'分数':'位次')+'）… '+s.ctx+'\n';});
+  if(sus.length>10)t+='- 另有 '+(sus.length-10)+' 处未列出\n';
+  return t;
+}
+
+// ===== 顶部数据状态条 =====
+async function loadDataStatus(){
+  var el=S('dataStatus');if(!el)return;
+  try{
+    var r=await fetch('engine-status');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    var j=await r.json();
+    if(j&&j.error){el.textContent='位次引擎异常：'+j.error;return;}
+    var cov=(j&&j.coverage)||[];
+    if(!cov.length){el.textContent='位次引擎未初始化 · 非湖南/广东将回落到旧库';return;}
+    var provs=[],maxY=0;
+    cov.forEach(function(x){
+      if(provs.indexOf(x.province)<0)provs.push(x.province);
+      if(x.y>maxY)maxY=x.y;
+    });
+    el.innerHTML='位次引擎就绪：<b>'+esc(provs.join(' / '))+'</b> · 参考 <b>'+maxY
+      +'</b> 年 · 校线位次 <b>'+(((j.counts||{}).school_rank)||0)+'</b> 条 · 每行都带年份与来源';
+  }catch(e){
+    el.textContent='位次引擎状态未知（不影响其他省份使用）';
+  }
+}
+
+// ===== 发送 / 中止 =====
+var busy=false,currentAbort=null;
+function setBusy(on,stage){
+  busy=!!on;
+  var bar=S('inpBar'),sb=S('sendBtn'),st=S('stopBtn');
+  if(bar){if(on){bar.classList.add('busy');}else{bar.classList.remove('busy');}}
+  if(sb)sb.disabled=!!on;
+  if(st)st.style.display=on?'inline-block':'none';
+  var ld=document.getElementById('loadingBubble');
+  if(ld&&stage){var s=ld.querySelector('.stage');if(s)s.textContent=stage;}
+}
+function showLoading(stage){
+  var a=S('msgArea');if(!a)return;
+  var ld=document.createElement('div');
+  ld.className='bubble a wide';ld.id='loadingBubble';
+  ld.innerHTML='<div class="who">顾问</div><span class="stage">'+esc(stage||'处理中…')+'</span>'
+    +'<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+  a.appendChild(ld);a.scrollTop=a.scrollHeight;
+}
+function stopGen(){
+  if(currentAbort){currentAbort.abort();}
+}
+async function send(){
+  if(busy)return;
+  var inp=S('inp');if(!inp)return;
+  var t=String(inp.value||'').trim();if(!t)return;
+  var pi=pendingIntake;pendingIntake=null;
+  var cfg=getCfg();
+  if(!cfg.key){toast('先在 API 设置里填好 Key，再点发送');openSet();return;}
+  inp.value='';
+  if(!curId||!chats[curId])newChat();
+  var c=chats[curId];
+  c.msgs.push({role:'user',content:t});
+  if(!c.name||c.name==='新对话')c.name=plainText(t).slice(0,16)||'新对话';
+  render();save();
+
+  currentAbort=new AbortController();
+  var sig=currentAbort.signal;
+  setBusy(true,'正在查数据…');
+  var area=S('msgArea');
+  var live=null,acc='',early=null,skel=null;
+  // 骨架屏：数据在本地查，几十~几百毫秒，先给个身子，别让屏幕空着
+  if(area){
+    skel=document.createElement('div');
+    skel.className='bubble a wide';skel.id='skelBubble';
+    skel.innerHTML='<div class="who">顾问</div><div class="skel">'
+      +'<div class="sk" style="width:38%"></div><div class="sk" style="width:92%"></div>'
+      +'<div class="sk" style="width:76%"></div><div class="sk" style="width:88%"></div>'
+      +'<div class="sk" style="width:60%"></div></div>';
+    area.appendChild(skel);area.scrollTop=area.scrollHeight;
+  }
+  try{
+    var q=await queryData(t,sig,pi,function(engNow){
+      // 本地数据一到就先出表，联网搜索/模型回答在后面补
+      if(!engNow||early)return;
+      if(skel&&skel.parentNode){skel.parentNode.removeChild(skel);skel=null;}
+      early={role:'assistant',content:'',engine:engNow,pending:true};
+      c.msgs.push(early);
+      render();save();
+      setBusy(true,'表格已出，正在补充联网信息与建议…');
+    });
+    var dh=q.text||'',eng=q.engine||null;
+    if(skel&&skel.parentNode){skel.parentNode.removeChild(skel);skel=null;}
+
+    var prompt=(c.mode==='fun')?PF:PG;
+    var ms=[{role:'system',content:prompt}];
+    if(dh&&dh.indexOf('暂无数据')<0){
+      ms.push({role:'system',content:'【死命令-只准用下面的真实数据-严禁编造】\n'+dh});
+    }else if(dh){
+      ms.push({role:'system',content:'【查询结果】\n'+dh+'\n\n数据库未返回有效数据。可以给方向性建议，但绝对禁止编造具体分数和位次。'});
+    }else{
+      ms.push({role:'system',content:'【注意】没有找到具体录取数据。必须明确说明暂无数据，禁止编造任何分数和位次。'});
+    }
+
+    var info=extractInfo(t);
+    if(info.province){
+      var pr='【省份志愿政策提醒】';
+      var ng={'浙江':80,'山东':96,'河北':96,'重庆':96,'辽宁':112};
+      var gg={'江苏':40,'广东':45,'湖北':45,'湖南':45,'福建':40,'北京':30,'天津':50,'上海':24,'海南':24,'河南':48,'四川':45,'陕西':45,'山西':45,'云南':40,'贵州':45,'内蒙古':45,'安徽':45,'江西':45,'黑龙江':40,'吉林':40,'广西':40,'甘肃':45,'新疆':45,'宁夏':45,'青海':45,'西藏':45};
+      if(ng[info.province]){pr+=info.province+'是专业+院校模式，可填'+ng[info.province]+'个志愿。';}
+      else if(gg[info.province]){pr+=info.province+'是院校+专业组模式，可填'+gg[info.province]+'个专业组，组内调剂风险要重点提示。';}
+      else{pr+=info.province+'注意专业组调剂风险。';}
+      ms.push({role:'system',content:pr});
+    }
+
+    for(var i=Math.max(0,c.msgs.length-25);i<c.msgs.length;i++){ms.push({role:c.msgs[i].role,content:c.msgs[i].content});}
+
+    // ★ 秒出表（兜底）：如果上面的回调没触发（例如老路径），这里补一次
+    if(eng&&!early){
+      early={role:'assistant',content:'',engine:eng,pending:true};
+      c.msgs.push(early);
+      render();save();
+    }
+
+    // 直播气泡
+    setBusy(true,eng?'表格已出，正在生成建议…':'正在生成建议…');
+    live=document.createElement('div');
+    live.className='bubble a md wide';live.id='liveBubble';
+    live.innerHTML='<div class="who">顾问</div><div class="live-body"></div><span class="stage">等待模型响应…</span>';
+    if(area){area.appendChild(live);area.scrollTop=area.scrollHeight;}
+    var bodyEl=live.querySelector('.live-body');
+    var stageEl=live.querySelector('.stage');
+    var lastPaint=0;
+
+    var apiUrl=cfg.url.replace(/\/+$/,'')+'/v1/chat/completions';
+    var reply=await streamChat(apiUrl,cfg.key,{
+      model:cfg.model||'deepseek-chat',
+      messages:ms,
+      temperature:(c.mode==='fun'?0.9:0.3),
+      max_tokens:4096
+    },sig,function(text){
+      acc=text;
+      var now=Date.now();
+      if(now-lastPaint<80)return;
+      lastPaint=now;
+      if(stageEl)stageEl.style.display='none';
+      if(bodyEl)bodyEl.innerHTML=mdCached(acc);
+      if(area)area.scrollTop=area.scrollHeight;
+    });
+    reply=reply||acc||'';
+    if(stageEl)stageEl.style.display='none';
+    if(bodyEl)bodyEl.innerHTML=mdCached(reply);
+
+    try{
+      var _cr=0,_cm=String(dh).match(/位次(\d+)/);if(_cm)_cr=+_cm[1];
+      var _sus=auditScan(reply,dh,_cr);
+      if(_sus.length)reply+=auditWarning(_sus);
+    }catch(_e){console.warn('audit failed:',_e.message);}
+
+    if(early){
+      early.content=reply;early.pending=false;
+      if(dh)early.raw=dh;
+    }else{
+      var msg={role:'assistant',content:reply};
+      if(eng)msg.engine=eng;
+      if(dh)msg.raw=dh;
+      c.msgs.push(msg);
+    }
+  }catch(e){
+    if(e&&e.name==='AbortError'){
+      if(early){early.content=(acc?acc+'\n\n':'')+'> 已停止生成。';early.pending=false;}
+      else c.msgs.push({role:'assistant',content:(acc?acc+'\n\n':'')+'> 已停止生成。'});
+    }else{
+      var errtxt='出错：'+((e&&e.message)||e)+'\n\n请检查 API 设置里的 Base URL 与 Key 是否正确。';
+      if(early){early.content=errtxt;early.pending=false;}
+      else c.msgs.push({role:'assistant',content:errtxt});
+    }
+  }
+  if(skel&&skel.parentNode)skel.parentNode.removeChild(skel);
+  if(live&&live.parentNode)live.parentNode.removeChild(live);
+  currentAbort=null;
+  setBusy(false);
+  render();save();
+}
+
+// ===== 智能数据提取（正则，无需API） =====
+function extractInfo(t){
+  var info={province:'',rank:0,score:0,major:'',school:''};
+  // 省份：找文本中最先出现的那个（不是列表中最先的）
+  var provs=['北京','天津','上海','重庆','河北','山西','辽宁','吉林','黑龙江','江苏','浙江','安徽','福建','江西','山东','河南','湖北','湖南','广东','广西','海南','四川','贵州','云南','西藏','陕西','甘肃','青海','宁夏','新疆','内蒙古'];
+  var bestIdx=t.length,bestProv='';
+  for(var i=0;i<provs.length;i++){
+    var idx=t.indexOf(provs[i]);
+    if(idx>=0&&idx<bestIdx){bestIdx=idx;bestProv=provs[i];}
+  }
+  info.province=bestProv;
+  var rm=t.match(/(\d{4,7})\s*[位名]/)||t.match(/[位名]次?\s*(\d{4,7})/)||t.match(/排[名行]\s*(\d{4,7})/);
+  if(rm){info.rank=parseInt(rm[1])||parseInt(rm[2])||0;}
+  var sm=t.match(/(\d{3})\s*分/)||t.match(/分数\s*(\d{3})/)||t.match(/(\d{3})\s*[分份]/);if(sm){info.score=parseInt(sm[1]);}
+  // 专业：过滤掉否定句式中的词（不学X/不接受X/不读X/不选X/别推荐X）
+  var majors=['计算机','软件','电气','机械','自动化','土木','临床','口腔','法学','会计','金融','物联网','人工智能','大数据','电子','通信','材料','化工','生物','医学','护理','师范','英语','日语','新闻','设计','美术','音乐','体育','汉语言','思政','马克思','数学','化学','地理','航空航天','能源','交通','环境'];
+  var neg=t.match(/(?:不学|不接受|不读|不选|别推荐|别学|拒绝|排斥|不想学|不考虑).*?(?:[。，,;\n]|$)/g)||[];
+  // 也排除描述性用语：XX一般/不好/不行/差/弱/烂，XX好/擅长这类不是专业偏好
+  var desc=t.match(/(?:英语|数学|语文|物理|化学|生物|历史|地理|政治).*?(?:一般|不好|不行|差|弱|烂|还行|凑合|勉强)/g)||[];
+  var desc2=t.match(/(?:英语|数学|语文|物理|化学|生物|历史|地理|政治).*?(?:好|不错|擅长|强|可以|能行)/g)||[];
+  var negStr=neg.join('')+desc.join('')+desc2.join('');
+  var found=[];
+  for(var i=0;i<majors.length;i++){
+    if(t.indexOf(majors[i])>=0&&negStr.indexOf(majors[i])<0){found.push(majors[i]);}
+  }
+  if(found.length>0)info.major=found.join(',');
+  var sch=t.match(/[一-鿿]{2,8}(大学|学院)/);if(sch){info.school=sch[0];}
+  return info;
+}
+
+// ===== 联网搜索：Tavily优先，Baidu兜底 =====
+async function searchWeb(query, cfg, n){
+  n=n||3;var results=[];
+  if(cfg.tavily){
+    try{
+      var ctrl=new AbortController();var to=setTimeout(function(){ctrl.abort();},12000);
+      var tavUrl='https://api.tavily.com/search';
+      var r=await fetch(tavUrl,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.tavily},body:JSON.stringify({query:query,search_depth:'basic',include_answer:true,max_results:n}),signal:ctrl.signal});
+      clearTimeout(to);
+      if(r.ok){var d=await r.json();if(d.answer)results.push('[Tavily总结] '+d.answer);if(d.results){d.results.forEach(function(x){results.push(x.title+': '+x.content.slice(0,300));});}}
+      else{console.warn('Tavily HTTP '+r.status);}
+    }catch(e){console.warn('Tavily失败:',e.message);}
+  }
+  if(!results.length){
+    try{
+      var r2=await fetch('/search?q='+encodeURIComponent(query));
+      if(r2.ok){var d2=await r2.json();if(d2.results&&d2.results.length){results.push('[百度搜索] '+(cfg.tavily?'Tavily无结果，百度兜底:':'未配置Tavily，使用百度搜索:'));d2.results.forEach(function(x){results.push(x);});}}
+    }catch(e){console.warn('百度搜索失败:',e.message);}
+  }
+  return results;
+}
+
+// ===== 主数据管线：AI分析提取→DB搜→联网搜→整合 =====
+async function queryData(t,sig,pi,onEngine){
+  var cfg=getCfg();
+  var info={province:'',rank:0,score:0,majors:[],schools:[],keywords:[]};
+  var engResult=null;
+  var structured=false;
+
+  // 第0步：表单结构化入参（优先，跳过反解，保留区间）
+  if(pi&&pi.province){
+    structured=true;
+    info.province=pi.province;
+    info.first=pi.first||'physics';
+    info.resel=pi.resel||[];
+    info.care=pi.care||[];
+    info.avoidArr=pi.avoid||[];
+    info.cities=(pi.cities||[]).filter(function(c){return c!=='不限'&&c!=='省内';});
+    info.localOnly=(pi.cities||[]).indexOf('省内')>=0;
+    info.adj=pi.adj||'';
+    info.scoreLo=parseInt(pi.scoreLo)||0;
+    info.scoreHi=parseInt(pi.scoreHi)||0;
+    info.rankLo=parseInt(pi.rankLo)||0;
+    info.rankHi=parseInt(pi.rankHi)||0;
+    if(info.scoreLo>info.scoreHi&&info.scoreHi){var sw=info.scoreLo;info.scoreLo=info.scoreHi;info.scoreHi=sw;}
+    info.rank=(info.rankLo&&info.rankHi)?Math.round((info.rankLo+info.rankHi)/2):(info.rankLo||0);
+    info.score=(info.scoreLo&&info.scoreHi)?Math.round((info.scoreLo+info.scoreHi)/2):(info.scoreLo||0);
+    console.log('结构化入参:',JSON.stringify(info));
+  }
+
+  // 第1步：AI优先提取（理解"一万三""川籍"等复杂语境）—— 只有手打字才需要
+  if(!structured&&cfg.key){
+    try{
+      var xp='从用户的高考咨询消息中提取信息。注意理解口语：\n';
+      xp+='- "一万三左右""1万3"→13000，"省排13420"→13420\n';
+      xp+='- "我是四川的""川籍"→四川，不要说\"上海\"在\"江苏\"前面就选上海\n';
+      xp+='- "物化生"→物理类，"史政地"→历史类\n';
+      xp+='- "想学自动化机械电气"→majors:["自动化","机械","电气"]\n';
+      xp+='- "不学计算机""不接受师范"→不要放进majors\n';
+      xp+='- "不想去新疆云贵"→region_avoid:["新疆","云南","贵州"]\n';
+      xp+='返回JSON:{"province":"","rank":0,"score":0,"subject":"","majors":[],"schools":[],"region_pref":[],"region_avoid":[],"keywords":[]}\n';
+      xp+='keywords填联网搜索关键词(如"四川 自动化 录取位次 2026")\n只返回JSON。\n用户消息: '+t;
+      var er=await fetch(cfg.url.replace(/\/+$/,'')+'/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.key},body:JSON.stringify({model:cfg.model||'deepseek-chat',messages:[{role:'user',content:xp}],temperature:0,max_tokens:250,signal:sig})});
+      if(er.ok){
+        var ed=await er.json();var raw=ed.choices[0].message.content.replace(/```/g,'').replace(/json/g,'').trim();
+        var ai=JSON.parse(raw);
+        info.province=ai.province||'';
+        info.rank=parseInt(ai.rank)||0;
+        info.score=parseInt(ai.score)||0;
+        info.majors=ai.majors||[];
+        info.schools=ai.schools||[];
+        info.keywords=ai.keywords||[];
+        console.log('AI提取:',JSON.stringify(info));
+      }
+    }catch(e){console.warn('AI提取失败，降级正则:',e.message);}
+  }
+  // 第2步：正则兜底（只在手打字时用，表单入参不需要）
+  if(!structured){
+    var re=extractInfo(t);
+    if(!info.province&&re.province)info.province=re.province;
+    if(!info.rank&&re.rank)info.rank=re.rank;
+    if(!info.score&&re.score)info.score=re.score;
+    if(!info.majors.length&&re.major)info.majors=[re.major];
+    if(!info.schools.length&&re.school)info.schools=[re.school];
+  }
+  console.log('最终提取:',JSON.stringify(info));
+
+  console.log('DEBUG queryData params:',JSON.stringify({province:info.province,rank:info.rank,score:info.score,majors:info.majors}));
+  var dbSkip = !info.province||(!info.rank&&!info.score); if(dbSkip){console.log("缺少关键信息，跳过DB但保留联网搜索");}
+
+  // 第3步：搜索本地数据库
+  var dbData='';
+  if(!dbSkip){try{
+    var _tr=(/历史|史政|政史/.test(t)&&!/物理|物化/.test(t))?'history':((/物理|物化/.test(t))?'physics':'');
+    if(structured)_tr=info.first==='history'?'history':'physics';
+    var qp=['province='+encodeURIComponent(info.province),'rank='+(info.rank||0),'score='+(info.score||0),'subject='+_tr];
+    if(structured){
+      qp.push('first='+_tr);
+      if(info.resel&&info.resel.length)qp.push('resel='+info.resel.join(','));
+      if(info.scoreLo&&info.scoreHi)qp.push('score_lo='+info.scoreLo+'&score_hi='+info.scoreHi);
+      if(info.rankLo&&info.rankHi)qp.push('rank_lo='+info.rankLo+'&rank_hi='+info.rankHi);
+      if(info.cities&&info.cities.length)qp.push('cities='+encodeURIComponent(info.cities.join(',')));
+      if(info.care&&info.care.length)qp.push('care='+info.care.join(','));
+      if(info.avoidArr&&info.avoidArr.length)qp.push('avoid='+encodeURIComponent(info.avoidArr.join(',')));
+    }
+    if(info.majors&&info.majors.length){qp.push('keyword='+encodeURIComponent(info.majors.join(',')));}
+    if(info.schools.length)qp.push('school='+encodeURIComponent(info.schools[0]));
+    var resp=await fetch('recommend?'+qp.join('&'),{signal:sig});
+    if(resp.ok){
+      var j=await resp.json();
+      if(j&&j.source==='engine')engResult=j;
+      if(j.chong||j.wen||j.bao){
+        var _head;
+        if(j.rangeMode&&j.scoreLo&&j.scoreHi){
+          _head='【本地数据库·冲稳保推荐】考生区间 '+j.scoreLo+'~'+j.scoreHi+' 分（位次区间 '+j.rankLo+'~'+j.rankHi+'，中位 '+j.rank+'）'
+            +(j.year?('；按 '+j.year+' 年 '+(j.track||'')+' 一分一段表同一年换算，按位次分档'):'');
+        }else{
+          _head='【本地数据库·冲稳保推荐】位次'+j.rank+(j.year?('（按'+j.year+'年'+(j.track||'')+'一分一段表换算，按位次分档）'):'');
+        }
+        dbData=_head+'\n';
+        if(j.subject){
+          var sj=j.subject;
+          dbData+='【选科·政策规则】'+sj.full+'（'+sj.label+'）：可报专业面 '+sj.coverage+'，'+sj.level_cn
+            +(sj.warning?('；⚠ '+sj.warning):'')
+            +'；依据'+sj.source+'，这是政策规则不是录取数据。\n';
+        }
+        if(j.directions&&j.directions.length){
+          dbData+='\n【方向候选·经验判断，不是录取数据】只准从这 '+j.directions.length+' 个里挑 3 个讲理由：\n';
+          j.directions.forEach(function(d,i){
+            dbData+=(i+1)+'. '+d.name+(d.need_chem_if_undecided?'（要求化学，没选化学报不了）':'')+'\n'
+              +'   代表专业：'+d.majors+'\n'
+              +'   定位：'+d.fit+'\n'
+              +'   就业：'+d.job+'\n'
+              +'   考研：'+d.grad+'；考公：'+d.gov+'\n'
+              +'   坑：'+d.pit+'\n';
+          });
+          if(j.directionNote)dbData+='（'+j.directionNote+'）\n';
+        }
+        if(j.chong&&j.chong.length){dbData+='\n▎冲 (比你区间上限还难，需要跳一跳):\n';j.chong.slice(0,20).forEach(function(d){dbData+='· '+d.school+' '+d.major+' '+d.year+'年 最低'+(d.needScore||d.score||'?')+'分 位次'+(d.rank||'?')+(d.gapText?(' ('+d.gapText+')'):'')+'\n';});}
+        if(j.wen&&j.wen.length){dbData+='\n▎稳 (门槛落在你的区间内，看发挥):\n';j.wen.slice(0,20).forEach(function(d){dbData+='· '+d.school+' '+d.major+' '+d.year+'年 最低'+(d.needScore||d.score||'?')+'分 位次'+(d.rank||'?')+(d.gapText?(' ('+d.gapText+')'):'')+'\n';});}
+        if(j.bao&&j.bao.length){dbData+='\n▎保 (比你的区间下限还容易):\n';j.bao.slice(0,20).forEach(function(d){dbData+='· '+d.school+' '+d.major+' '+d.year+'年 最低'+(d.needScore||d.score||'?')+'分 位次'+(d.rank||'?')+(d.gapText?(' ('+d.gapText+')'):'')+'\n';});}
+        if(!j.chong.length&&!j.wen.length&&!j.bao.length){dbData+='(数据库暂无数据。查询参数: 省='+info.province+' 位次='+info.rank+' 分数='+info.score+' 关键词='+(info.majors.join(',')||'无')+')\n';}
+      }
+    }
+  }catch(e){console.warn('DB搜索失败:',e.message);}}
+
+  // 第4步：联网搜索——三路并发：验证DB数据 + 补全2025 + 行业趋势
+  // ★ 先把本地数据交出去（队列渲染），联网搜索在后面慢慢补，别让用户干等
+  if(engResult&&typeof onEngine==='function'){try{onEngine(engResult);}catch(_e){}}
+  var webData='';
+  try{
+    var queries=[];
+    // 路1：验证DB学校（冲稳保各5所，搜最新分数线）
+    var dbSchools=[];
+    if(j&&j.chong)for(var i=0;i<Math.min(5,j.chong.length);i++)dbSchools.push(j.chong[i].school);
+    if(j&&j.wen)for(var i=0;i<Math.min(5,j.wen.length);i++)dbSchools.push(j.wen[i].school);
+    if(j&&j.bao)for(var i=0;i<Math.min(5,j.bao.length);i++)dbSchools.push(j.bao[i].school);
+    for(var i=0;i<dbSchools.length;i++){
+      queries.push(dbSchools[i]+' '+info.province+' 2026录取分数线位次 王牌专业');
+    }
+    // 路2：补全DB没有的2025数据
+    if(info.majors.length&&info.province){
+      queries.push(info.province+' 2026年 '+info.majors[0]+'专业 录取位次 本科批');
+      queries.push(info.province+' '+info.rank+'位次 2026 能报哪些大学 '+info.majors.join(' '));
+    }
+    // 路3：行业趋势和就业
+    if(info.majors.length){
+      queries.push(info.majors[0]+'专业 2026 2027 就业前景 薪资 行业趋势');
+    }
+    // AI提取的关键词也加上
+    if(info.keywords&&info.keywords.length){
+      for(var i=0;i<Math.min(2,info.keywords.length);i++)queries.push(info.keywords[i]);
+    }
+    if(dbSkip){
+      queries.push(t+' 高考志愿 推荐学校 录取分数线');
+      queries.push(t+' 高考 位次 能报哪些大学');
+      if(info.majors&&info.majors.length)queries.push(info.majors.join(' ')+'专业 就业前景');
+      if(info.schools&&info.schools.length)queries.push(info.schools[0]+' 录取分数线 2026');
+    }
+    // 去重query
+    var seenQ={};var finalQ=[];
+
+    for(var i=0;i<queries.length;i++){if(!seenQ[queries[i]]){seenQ[queries[i]]=1;finalQ.push(queries[i]);}}
+    // 分3批并行搜索（每批5个同时发，避免限流）
+    var allWeb=[];
+    for(var b=0;b<finalQ.length;b+=5){
+      var batch=finalQ.slice(b,b+5);
+      var tasks=[];for(var i=0;i<batch.length;i++){tasks.push(searchWeb(batch[i],cfg,2));}
+      try{var results=await Promise.all(tasks);for(var i=0;i<results.length;i++){allWeb=allWeb.concat(results[i]);}}catch(e){console.warn('批次搜索失败:',e.message);}
+    }
+    var seen={};var unique=[];
+    for(var i=0;i<allWeb.length;i++){var k=allWeb[i].slice(0,50);if(!seen[k]){seen[k]=1;unique.push(allWeb[i]);}}
+    if(unique.length){webData='【联网搜索·仅供参考】\n';unique.slice(0,15).forEach(function(w){webData+='· '+w.slice(0,300)+'\n';});}
+  }catch(e){console.warn('联网搜索失败:',e.message);}
+
+  // 第5步：整合
+  var _q=[];
+  if(info.province)_q.push(info.province);
+  if(info.first)_q.push(info.first==='history'?'历史类':'物理类');
+  if(info.resel&&info.resel.length)_q.push(comboLabel(info.first==='history'?'history':'physics',info.resel));
+  if(info.scoreLo&&info.scoreHi)_q.push(info.scoreLo+'-'+info.scoreHi+'分');
+  else if(info.score)_q.push(info.score+'分');
+  if(info.rankLo&&info.rankHi)_q.push('位次'+info.rankLo+'-'+info.rankHi);
+  else if(info.rank)_q.push('位次'+info.rank);
+  if(info.care&&info.care.length)_q.push('更看重'+info.care.map(function(c){return CARE_CN[c]||c;}).join('/'));
+  if(info.majors&&info.majors.length)_q.push('专业:'+info.majors.join('/'));
+  var result=(_q.length?('> 查询：'+_q.join(' · ')+'\n\n'):'');
+  if(dbData)result+=dbData+'\n';
+  if(webData)result+=webData+'\n';
+  if(!dbData&&!webData)result+='（本次没有取得具体录取数据。）\n';
+  return {text:result,engine:engResult};
+}
+function getCfg(){return{url:localStorage.getItem('cf_url')||'https://api.deepseek.com',key:localStorage.getItem('cf_key')||'',model:localStorage.getItem('cf_model')||'deepseek-chat',tavily:localStorage.getItem('cf_tav')||''};}
+function openSet(){var ov=S('setOverlay');if(ov)ov.style.display='flex';var c=getCfg();var su=S('sUrl'),sk=S('sKey'),sm=S('sModel'),st=S('sTav');if(su)su.value=c.url;if(sk)sk.value=c.key;if(sm)sm.value=c.model;if(st)st.value=c.tavily;}
+function closeSet(){var ov=S('setOverlay');if(ov)ov.style.display='none';}
+async function testConn(){var su=S('sUrl'),sk=S('sKey'),sm=S('sModel'),sv=S('sTav'),stt=S('st');if(!su||!sk||!stt)return;var u=su.value.trim(),k=sk.value.trim(),m=sm?sm.value.trim():'',tv=sv?sv.value.trim():'';if(!u||!k){stt.innerHTML='<span class=\"st b\">请填写URL和Key</span>';return;}try{localStorage.setItem('cf_url',u);localStorage.setItem('cf_key',k);localStorage.setItem('cf_model',m);if(tv)localStorage.setItem('cf_tav',tv);}catch(e){}stt.textContent='测试中...';try{var r=await fetch(u.replace(/\/+$/,'')+'/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify({model:m||'deepseek-chat',messages:[{role:'user',content:'hi'}],max_tokens:5})});if(r.ok){stt.innerHTML='<span class=\"st g\">连接OK</span>';setTimeout(closeSet,800);}else{var e=await r.json().catch(function(){return{};});stt.innerHTML='<span class=\"st b\">'+(e.error&&e.error.message||'')+'</span>';}}catch(e){stt.innerHTML='<span class=\"st b\">连接失败: '+e.message+'<br><small>请求地址: '+u.replace(/\/+$/,'')+'/v1/chat/completions</small></span>';}}
+
+// Event bindings
+function B(id,ev,fn){var el=S(id);if(el)el[ev]=fn;}
+B('btnG','onclick',function(){setMode('gaokao');});B('btnF','onclick',function(){setMode('fun');});
+B('newBtn','onclick',function(){newChat();});B('sendBtn','onclick',function(){send();});
+B('themeBtn','onclick',function(){document.body.classList.toggle('dark');localStorage.setItem('xf_dark',document.body.classList.contains('dark')?'1':'0');});
+B('bigBtn','onclick',function(){
+  document.body.classList.toggle('big');
+  var on=document.body.classList.contains('big');
+  localStorage.setItem('xf_big',on?'1':'0');
+  toast(on?'已切到大字模式':'已切回正常字号');
+});
+B('undoBtn','onclick',function(){doUndo();});
+B('apiBtn','onclick',function(){openSet();});B('closeSetBtn','onclick',function(){closeSet();});B('testBtn','onclick',function(){testConn();});
+B('setOverlay','onclick',function(e){if(e.target===this)closeSet();});
+B('inp','onkeydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+B('stopBtn','onclick',function(){stopGen();});
+B('draftBar','onclick',function(e){onDraftClick(e);});
+B('draftOverlay','onclick',function(e){if(e.target===this){closeDraft();return;}onDraftClick(e);});
+B('queryOverlay','onclick',function(e){if(e.target===this){closeQuery();return;}});
+B('queryClose','onclick',function(){closeQuery();});
+B('queryGo','onclick',function(){submitQuery();});
+B('msgArea','onclick',function(e){onMsgAreaClick(e);});
+B('chatList','onclick',function(e){var el=e.target;if(el.dataset.del){if(confirm('删除这个对话？删了就找不回来了。'))delChat(el.dataset.del);return;}var item=el.closest('.item');if(item){curId=item.dataset.id;if(chats[curId]&&chats[curId].mode)setMode(chats[curId].mode);else render();save();}});
+// init
+try{
+var _dk=localStorage.getItem('xf_dark');
+if(_dk==='1')document.body.classList.add('dark');
+else if(_dk!=='0'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)document.body.classList.add('dark');
+if(localStorage.getItem('xf_big')==='1')document.body.classList.add('big');
+if(!curId||!chats[curId]){var nid=Date.now()+'';chats[nid]={name:'新对话',mode:mode,msgs:[]};curId=nid;save();}
+setMode(mode);loadDataStatus();render();
+}catch(e){console.warn('init error:',e.message);document.body.innerHTML='<div style=\"padding:40px;text-align:center\"><h2>加载失败</h2><p>请清除浏览器缓存后刷新 (Ctrl+Shift+Del)</p></div>';}
+</script>
+</body></html>
